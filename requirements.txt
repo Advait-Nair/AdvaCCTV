@@ -1,0 +1,5 @@
+websockets>=15.0.1
+python-dotenv>=1.1.1
+
+# ALPHA, TRACK AND CHANGE
+# picamera2==0.2.2
