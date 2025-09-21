@@ -7,9 +7,9 @@ def QuickSetup():
     print('\n'*11)
     print("AdvaCCTV Quick Setup\n")
 
-    server_ip= input("Enter the server IP to use")
-    server_port= input("Enter the server port to use")
-    server_mode= "true" if "t" in input("Is this a server? (true/false)") else "false"
+    server_ip= input("Enter the server IP to use : ")
+    server_port= input("Enter the server port to use : ")
+    server_mode= "true" if "t" in input("Is this a server? (true/false) : ") else "false"
 
     with open("config.toml", "r") as f:
         contents = f.read()
