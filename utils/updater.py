@@ -21,5 +21,6 @@ def check_update():
 
 
 async def UpdaterCycle():
-    check_update()
-    await sleep(60)
+    while True:
+        check_update()
+        await sleep(60)
