@@ -66,7 +66,7 @@ def is_server():
     
 
     try:
-      return server_mode.lower() == "true"
+      return server_mode.lower() != "true" or server_mode == True
     except:
       return False
 
