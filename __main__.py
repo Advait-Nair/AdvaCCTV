@@ -95,4 +95,5 @@ if __name__ == "__main__":
         # run(UpdaterCycle())
     except Exception as e:
         output(title="A fatal Main () error has occurred!", msg=f"This is on the {locflag}.", ctype=CodeType.Error, code=0, e=e)
-  
+
+print("\nCCTV Daemon/Server has exited.")
