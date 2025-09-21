@@ -1,0 +1,14 @@
+# ADVACCTV CONFIG FILE
+
+[server]
+    server_ip="192.168.0.2"
+    server_port=2025
+
+[properties]
+    update_schedule_time = 6 # as a fraction of 24 hours
+    update_source = "https://github.com/Advait-Nair/AdvaCCTV"
+
+    daemon_sends_chunk_size = 5000
+
+[flags]
+    server_mode=false

@@ -40,12 +40,23 @@
       
 """
 
-from server import ServerMain
-from daemon import DaemonMain
+from endpoints.server import ServerMain
+from endpoints.daemon import DaemonMain
 from error.output import output, CodeType
 import os
 import sys
-from env_data import *
+from utils.config import *
+from asyncio import run, gather
+from utils.updater import UpdaterCycle
+
+
+import tracemalloc
+tracemalloc.start()
+
+
+# Python Version Information - Dependency Debug, Runtime Info
+print ('\n'*11)
+print (sys.version,'\n__\n')
 
 
 def is_server():
@@ -76,7 +87,12 @@ if __name__ == "__main__":
 
     print(f"{target_ip}:{port} | {locflag}")
 
-    try: Main()
+    try:
+        async def dual(): await gather(Main(), UpdaterCycle())
+        run(dual())
+
+        # run(Main())
+        # run(UpdaterCycle())
     except Exception as e:
         output(title="A fatal Main () error has occurred!", msg=f"This is on the {locflag}.", ctype=CodeType.Error, code=0, e=e)
   

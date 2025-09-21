@@ -16,12 +16,14 @@ async def start_websocket_server(target_ip:str, port:int, action:Callable[[Serve
         async with serve(action, target_ip, port) as server:
             await server.serve_forever()
     
-    asyncio.run(_wsmain())
+    # asyncio.run(_wsmain())
+    await _wsmain()
 
 
 async def start_client(target_ip:str, port:int, action:Callable[[ClientConnection], None]):
     async def _wsclient():
         async with connect(f"ws://{target_ip}:{port}") as websocket:
-            action(websocket)
+            await action(websocket)
     
-    asyncio.run(_wsclient())
+    # asyncio.run(_wsclient())
+    await _wsclient()
