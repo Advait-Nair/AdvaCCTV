@@ -1,12 +1,15 @@
 # ADVACCTV CONFIG FILE
 
 [server]
-    server_ip="192.168.0.2"
+    server_ip="192.168.0.20"
     server_port=2025
 
 [properties]
     update_check_rate = 30
     update_source = "https://github.com/Advait-Nair/AdvaCCTV"
+
+    max_log_size = 5000 # lines
+    delete_top_n_lines_on_log_full = 10
 
     daemon_sends_chunk_size = 5000
 

@@ -49,6 +49,7 @@ from utils.config import *
 from asyncio import run, gather
 from utils.updater import UpdaterCycle
 from utils.quick_setup import QuickSetup
+from utils.log import log, instantiate_log_session
 import subprocess
 import tracemalloc
 tracemalloc.start()
@@ -86,9 +87,10 @@ if __name__ == "__main__":
     # Decide whether this is daemon or server-side
     Main, locflag = get_loc()
 
-    print(f"{target_ip}:{port} | {locflag}")
+    log(f"{target_ip}:{port} | {locflag}")
 
     try:
+        instantiate_log_session()
         async def dual(): await gather(Main(), UpdaterCycle())
         run(dual())
 
@@ -97,4 +99,4 @@ if __name__ == "__main__":
     except Exception as e:
         output(title="A fatal Main () error has occurred!", msg=f"This is on the {locflag}.", ctype=CodeType.Error, code=0, e=e)
 
-print("\nCCTV Daemon/Server has exited.")
+log("\nCCTV Daemon/Server has exited.")
