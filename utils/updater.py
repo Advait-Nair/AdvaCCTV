@@ -4,9 +4,21 @@ from utils.config import properties_cfg
 from asyncio import sleep
 import subprocess
 check_rate = properties_cfg.get("update_check_rate")
-
+from utils.config import CONFIG_PATH
 def update():
+    # Save toml file
+
+    toml = ""
+    with open(CONFIG_PATH, 'r') as f:
+        toml = f.read()
+        f.close()
+
     subprocess.run("git pull".split(' '))
+
+    with open(CONFIG_PATH, 'w') as fw:
+        fw.write(toml)
+        fw.close()
+
     subprocess.run("python3.12 .".split(' '))
     exit(0)
 
