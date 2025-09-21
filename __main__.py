@@ -64,11 +64,7 @@ def is_server():
     if "-svm" in sys.argv:
       return True
     
-    print(server_mode)
-    try:
-      return server_mode.lower() != "true" or server_mode == True
-    except:
-      return False
+    return server_mode
 
 def get_loc():
     Main = DaemonMain
