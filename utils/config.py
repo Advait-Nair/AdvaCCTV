@@ -19,7 +19,7 @@ with open(CONFIG_PATH, "rb") as f:
 
     target_ip = server_cfg.get("server_ip")
     port = server_cfg.get("server_port")
-    server_mode = server_cfg.get("server_mode")
+    server_mode = flags_cfg.get("server_mode")
     chunk_size = server_cfg.get("daemon_sends_chunk_size")
 
 
