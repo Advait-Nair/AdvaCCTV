@@ -48,8 +48,8 @@ import sys
 from utils.config import *
 from asyncio import run, gather
 from utils.updater import UpdaterCycle
-
-
+from utils.quick_setup import QuickSetup
+import subprocess
 import tracemalloc
 tracemalloc.start()
 
@@ -82,6 +82,11 @@ def get_loc():
     
 
 if __name__ == "__main__":
+    if "setup" in sys.argv:
+        QuickSetup()
+        subprocess.run("python3.12 .".split(' '))
+
+
     # Decide whether this is daemon or server-side
     Main, locflag = get_loc()
 

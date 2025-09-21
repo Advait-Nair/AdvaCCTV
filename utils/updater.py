@@ -3,12 +3,12 @@
 from utils.config import properties_cfg
 from asyncio import sleep
 import subprocess
-update_time = properties_cfg.get("update_schedule_time")
+check_rate = properties_cfg.get("update_check_rate")
 
 def update():
     subprocess.run("git pull".split(' '))
     subprocess.run("python3.12 .".split(' '))
-    
+
     # subprocess.run("git pull \n && python3.12 .".split(' '))
 
 def check_update():
@@ -26,4 +26,4 @@ def check_update():
 async def UpdaterCycle():
     while True:
         check_update()
-        await sleep(60)
+        await sleep(float(check_rate))
