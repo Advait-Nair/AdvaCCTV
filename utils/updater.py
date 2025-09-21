@@ -6,7 +6,7 @@ import subprocess
 update_time = properties_cfg.get("update_schedule_time")
 
 def update():
-    subprocess.run("git pull ; python3.12 .".split(' '))
+    subprocess.run("git pull \n && python3.12 .".split(' '))
 
 def check_update():
     subprocess.run("git remote update".split(' '))
