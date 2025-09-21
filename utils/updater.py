@@ -9,6 +9,7 @@ def update():
     subprocess.run("git pull \n && python3.12 .".split(' '))
 
 def check_update():
+    print("Running update check...")
     subprocess.run("git remote update".split(' '), stdout=subprocess.DEVNULL)
     needs_update = not "up to date" in subprocess.run("git status | grep \"up to date\"".split(' '),encoding="utf-8", stdout=subprocess.PIPE).stdout
     
