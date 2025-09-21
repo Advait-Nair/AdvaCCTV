@@ -1,7 +1,7 @@
 import datetime
 from utils.config import properties_cfg
 
-max_log_size = properties_cfg.get("max_log_size")
+max_log_size:int = properties_cfg.get("max_log_size") or 5000
 delete_top_n_lines_on_log_full = properties_cfg.get("delete_top_n_lines_on_log_full")
 
 LOG_PATH = "primary.log"
