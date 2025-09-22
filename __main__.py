@@ -83,6 +83,9 @@ if __name__ == "__main__":
         QuickSetup()
         subprocess.run("python3.12 .".split(' '))
 
+    if "update" in sys.argv:
+        subprocess.run(["git", "pull"])
+
 
     # Decide whether this is daemon or server-side
     Main, locflag = get_loc()

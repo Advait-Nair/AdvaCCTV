@@ -1,4 +1,5 @@
 import re
+from utils.systemctl_restarter import Restarter
 
 # Quick setup tool
 # Used to setup the config file on first run
@@ -29,3 +30,7 @@ def QuickSetup():
             write_f.close()
 
         f.close()
+    
+    autostart_req = True if 'y' in input ("Do you want to auto-setup systemd service? (Y/N) : ").lower() else False
+    if autostart_req:
+        Restarter()
