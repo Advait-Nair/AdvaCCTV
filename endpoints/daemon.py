@@ -8,6 +8,7 @@ from utils.log import log, ts
 
 
 async def DaemonTasks(websocket:ClientConnection):
+    log("Beginning Daemon Tasks...")
     await websocket.send("AdvaCCTV Daemon - WS Handshake at" + ts())
     message = await websocket.recv()
     log('From Server: ', message)
@@ -16,6 +17,7 @@ async def DaemonTasks(websocket:ClientConnection):
 
 async def ContinuouslyVideoClip(websocket_sender):
     import camera.picamera_interface as cami
+    log("Starting continuous video clipping...")
     while True:
         save_path, output = await cami.clip_video()
         await websocket_sender(cutils.get_video_binary(save_path=save_path, output=output))
