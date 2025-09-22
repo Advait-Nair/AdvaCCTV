@@ -111,5 +111,7 @@ if __name__ == "__main__":
     except Exception as e:
         output(title="A fatal Main () error has occurred!", msg=f"This is on the {locflag}.", ctype=CodeType.Error, code=0, e=e)
         log(f"\n\nA fatal Main () error has occurred! This is on the {locflag}.\n")
+        subprocess.run('python3.12 .'.split(' '))
+        exit(1)
 
 log("\nCCTV Daemon/Server has exited.")
