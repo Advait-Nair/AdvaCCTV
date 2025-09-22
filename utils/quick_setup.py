@@ -12,12 +12,21 @@ def _QuickSetup():
     # Append acctv to .bashrc if not already present
     with open(f"{str(Path.home())}/.bashrc", "r") as f:
         bashrc = f.read()
-        if "alias acctv=" not in bashrc:
-            with open(f"{str(Path.home())}/.bashrc", "a") as fa:
-                fa.write('\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && python3.12 ."\n')
-                fa.close()
+        # Check if the alias already exists in bashrc
+        if 'alias acctv=' in bashrc:
+            # Remove the existing alias
+            bashrc = re.sub(r'\n# AdvaCCTV Alias\nalias acctv=.*\n', '\n', bashrc)
+            # Write the cleaned bashrc back
+            with open(f"{str(Path.home())}/.bashrc", "w") as fw:
+                fw.write(bashrc)
+                fw.close()
+        
+        with open(f"{str(Path.home())}/.bashrc", "a") as fa:
+            fa.write('\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && python3.12 . $@"\n')
+            fa.close()
+        f.close()
 
-    input("Bashrc alias has been created. Run shortcut is 'acctv'. Press Enter to continue with parameter modification, or ^C to abort...")
+    input("Bashrc alias has been created. Run shortcut is 'acctv'. Press Enter to continue with parameter modification, or ^C to abort... ")
     
     
     server_ip= input("Enter the server IP to use : ")

@@ -50,6 +50,7 @@ from asyncio import run, gather
 from utils.updater import UpdaterCycle
 from utils.quick_setup import QuickSetup
 from utils.log import log, instantiate_log_session
+from utils.systemctl_restarter import Restarter
 import subprocess
 import tracemalloc
 tracemalloc.start()
@@ -85,7 +86,11 @@ if __name__ == "__main__":
 
     if "update" in sys.argv:
         subprocess.run(["git", "pull"])
-
+        exit(1)
+    if "autostart-set" in sys.argv:
+        
+        Restarter()
+        exit(1)
 
     # Decide whether this is daemon or server-side
     Main, locflag = get_loc()
