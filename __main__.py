@@ -44,6 +44,16 @@ from endpoints.server import ServerMain
 from endpoints.daemon import DaemonMain
 from error.output import output, CodeType
 import os
+
+# If config.toml is missing, copy config_base.toml to config.toml
+if not os.path.exists(CONFIG_PATH):
+    if os.path.exists("config_base.toml"):
+        subprocess.run("cp config_base.toml config.toml".split(' '))
+    else:
+        output(title="Critical Error!", msg="Config file is missing, and config_base.toml is also missing! Please redownload the package.", ctype=CodeType.Error, code=0)
+        exit(1)
+
+
 import sys
 from utils.config import *
 from asyncio import run, gather
@@ -79,13 +89,7 @@ def get_loc():
     return [Main, locflag]
 
 
-# If config.toml is missing, copy config_base.toml to config.toml
-if not os.path.exists(CONFIG_PATH):
-    if os.path.exists("config_base.toml"):
-        subprocess.run("cp config_base.toml config.toml".split(' '))
-    else:
-        output(title="Critical Error!", msg="Config file is missing, and config_base.toml is also missing! Please redownload the software package.", ctype=CodeType.Error, code=0)
-        exit(1)
+
 
 if __name__ == "__main__":
     if "setup" in sys.argv:
