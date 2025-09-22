@@ -30,7 +30,7 @@ def update():
             # Add to git assume-unchanged to ignore changes
             subprocess.run(f"git update-index --assume-unchanged {file}".split(' '))
     subprocess.run("git pull".split(' '))
-    subprocess.run(f"pip3.12 install -r requirements.txt {"--break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
+    subprocess.run(f"pip3.12 install -r requirements.txt{" --break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
 
     # with open(CONFIG_PATH, 'w') as fw:
     #     fw.write(toml)
@@ -48,7 +48,13 @@ def check_update():
     
     if needs_update:
         log("\n\nPreparing update...\n")
-        update()
+        try: update()
+        except Exception as e:
+            log("Update failed! Error below:")
+            log(e)
+            print('\n'*10)
+            return
+        
         log("Update complete! The server will auto-restart.")
         print('\n'*10)
 
