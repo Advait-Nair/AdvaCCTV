@@ -14,6 +14,7 @@ async def ServerTasks(websocket:ServerConnection):
 
 
 async def ServerMain():
+    log("Starting WS Server...")
     await start_websocket_server(
         target_ip=target_ip,
         port=port,

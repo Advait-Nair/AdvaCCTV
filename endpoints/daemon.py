@@ -25,6 +25,7 @@ async def ContinuouslyVideoClip(websocket_sender):
 
 
 async def DaemonMain():
+    log("Starting WS Daemon...")
     await start_client(
         target_ip=target_ip,
         port=port,
