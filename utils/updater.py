@@ -16,7 +16,19 @@ def update():
     # with open(CONFIG_PATH, 'r') as f:
     #     toml = f.read()
     #     f.close()
+    # Run git stash to save any local changes
+    subprocess.run("git stash".split(' '))
 
+    # Run git fetch to get remote changes without merging
+    subprocess.run("git fetch".split(' '))
+
+    # Create a list of files to ignore during pull
+    ignore_files = ["primary.log", "config.toml"]
+    for file in ignore_files:
+        # Check if the file exists
+        if os.path.exists(file):
+            # Add to git assume-unchanged to ignore changes
+            subprocess.run(f"git update-index --assume-unchanged {file}".split(' '))
     subprocess.run("git pull".split(' '))
     subprocess.run(f"pip3.12 install -r requirements.txt {"--break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
 
