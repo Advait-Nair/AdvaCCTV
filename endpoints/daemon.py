@@ -17,7 +17,7 @@ async def DaemonTasks(websocket:ClientConnection):
 async def ContinuouslyVideoClip(websocket_sender):
     import camera.picamera_interface as cami
     while True:
-        save_path, output = cami.clip_video()
+        save_path, output = await cami.clip_video()
         await websocket_sender(cutils.get_video_binary(save_path=save_path, output=output))
 
 
