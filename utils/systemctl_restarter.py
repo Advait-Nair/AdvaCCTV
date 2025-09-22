@@ -156,7 +156,7 @@ def Restarter():
         check_service_status()
         
         print("\n=== Setup Complete! ===")
-        print("\nYour AdvaCCTV application will now:")
+        print("\nAdvaCCTV will now:")
         print("• Start automatically on boot")
         print("• Restart automatically if it crashes")
         print("• Run in the background as a system service")

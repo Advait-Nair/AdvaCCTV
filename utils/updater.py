@@ -4,6 +4,7 @@ from utils.config import properties_cfg
 from asyncio import sleep
 import subprocess
 from utils.log import log
+import os
 
 
 check_rate = properties_cfg.get("update_check_rate")
@@ -17,6 +18,7 @@ def update():
     #     f.close()
 
     subprocess.run("git pull".split(' '))
+    subprocess.run(f"pip3.12 install -r requirements.txt {"--break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
 
     # with open(CONFIG_PATH, 'w') as fw:
     #     fw.write(toml)
