@@ -1,6 +1,7 @@
 from pathlib import Path
 import re
 from utils.systemctl_restarter import Restarter
+import os
 
 # Quick setup tool
 # Used to setup the config file on first run
@@ -22,7 +23,7 @@ def _QuickSetup():
                 fw.close()
         
         with open(f"{str(Path.home())}/.bashrc", "a") as fa:
-            fa.write('\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && python3.12 . $@"\n')
+            fa.write(f'\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && {"source ./.venv/bin/activate &&" if os.path.exists('.venv') else ''} python3.12 . $@"\n')
             fa.close()
         f.close()
 
