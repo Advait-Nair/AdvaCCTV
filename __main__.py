@@ -41,6 +41,8 @@
 """
 import os
 
+from utils.cfg_path import CONFIG_PATH
+
 # If config.toml is missing, copy config_base.toml to config.toml
 if not os.path.exists(CONFIG_PATH):
     if os.path.exists("config_base.toml"):

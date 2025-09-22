@@ -6,10 +6,12 @@
 # port = environ.get('server_port')
 # server_mode = environ.get("server_mode")
 
-CONFIG_PATH = "config.toml"
+
 
 import tomllib
 import os
+
+from utils.cfg_path import CONFIG_PATH
 
 
 with open(CONFIG_PATH, "rb") as f:
