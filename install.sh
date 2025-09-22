@@ -13,14 +13,14 @@ then
     
     # Detect the package manager
     if command -v apt &> /dev/null; then
-        sudo apt update
-        sudo apt install -y python3.12 python3.12-venv
+        apt update
+        apt install -y python3.12 python3.12-venv
     elif command -v dnf &> /dev/null; then
-        sudo dnf install -y python3.12 python3.12-devel
+        dnf install -y python3.12 python3.12-devel
     elif command -v yum &> /dev/null; then
-        sudo yum install -y python3.12 python3.12-devel
+        yum install -y python3.12 python3.12-devel
     elif command -v pacman &> /dev/null; then
-        sudo pacman -Sy python python-pip
+        pacman -Sy python python-pip
     elif command -v brew &> /dev/null; then
         brew install python@3.12
     else
