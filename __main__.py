@@ -110,5 +110,6 @@ if __name__ == "__main__":
         exit(1)
     except Exception as e:
         output(title="A fatal Main () error has occurred!", msg=f"This is on the {locflag}.", ctype=CodeType.Error, code=0, e=e)
+        log(f"\n\nA fatal Main () error has occurred! This is on the {locflag}.\n")
 
 log("\nCCTV Daemon/Server has exited.")

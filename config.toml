@@ -11,7 +11,8 @@
     max_log_size = 5000 # lines
     delete_top_n_lines_on_log_full = 10
 
-    daemon_sends_chunk_size = 5000
+    capture_clip_length = 60
+    video_save_path = "./videos"
 
 [flags]
     server_mode=false
