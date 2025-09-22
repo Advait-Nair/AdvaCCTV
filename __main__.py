@@ -99,6 +99,9 @@ if __name__ == "__main__":
 
         # run(Main())
         # run(UpdaterCycle())
+    
+    except KeyboardInterrupt:
+        log("\n\nACCTV has been manually aborted.\n")
     except Exception as e:
         output(title="A fatal Main () error has occurred!", msg=f"This is on the {locflag}.", ctype=CodeType.Error, code=0, e=e)
 
