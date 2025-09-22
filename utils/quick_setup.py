@@ -34,7 +34,7 @@ def _QuickSetup():
     server_port= input("Enter the server port to use : ")
     server_mode= "true" if "t" in input("Is this a server? (true/false) : ") else "false"
 
-    with open("config.toml", "r") as f:
+    with open("config_base.toml", "r") as f:
         contents = f.read()
         
         # Replace server_ip with quotes

@@ -4,6 +4,7 @@ from picamera2 import Picamera2
 from utils.config import clip_size, properties_cfg
 import datetime
 import asyncio
+from utils.generic import create_path_if_not_exists
 
 cam = Picamera2()
 vcfg = cam.create_video_configuration({'size': (1920, 1080), 'format': 'YUV420'})
@@ -14,6 +15,10 @@ encoder.audio = False
 
 DEFAULT_CLIP_LENGTH = clip_size or 60
 VIDEO_SAVE_PATH = properties_cfg.get('video_save_path') or './videos'
+
+
+
+create_path_if_not_exists(VIDEO_SAVE_PATH)
 
 def vname(length:int=DEFAULT_CLIP_LENGTH, suffix=".h264"):
     now = datetime.datetime.now()

@@ -6,3 +6,4 @@ docker-compose.test.yml
 Dockerfile.test
 TEST_ENVIRONMENT.md
 **.log
+videos/*
