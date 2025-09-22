@@ -5,3 +5,4 @@ docker-compose.test.yml
 .DS_Store
 Dockerfile.test
 TEST_ENVIRONMENT.md
+**.log
