@@ -17,6 +17,7 @@ def ensure_log_file_exists():
         with open(LOG_PATH, 'w') as f:
             f.close()
 
+
 def ts():
     now = datetime.datetime.now()
     return now.strftime("[%d %b %Y at %H:%M:%S]")
@@ -35,6 +36,7 @@ def removeTopLines(file_path, num_lines):
     
 
 def log(*args, **kwargs):
+    ensure_log_file_exists()
     timestamp = ts()
     print(timestamp, *args, **kwargs)
     recorded_size = 0
