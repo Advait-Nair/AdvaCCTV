@@ -53,6 +53,11 @@ def check_update():
             log("Update failed! Error below:")
             log(e)
             print('\n'*10)
+            subprocess.run("git reset --hard HEAD".split(' '))
+            subprocess.run("git clean -f".split(' '))
+            subprocess.run("git pull".split(' '))
+            subprocess.run("python3.12 .".split(' '))
+            exit(1)
             return
         
         log("Update complete! The server will auto-restart.")
