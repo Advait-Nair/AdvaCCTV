@@ -42,6 +42,8 @@
 import os
 
 from utils.cfg_path import CONFIG_PATH
+import subprocess
+from error.output import output, CodeType
 
 # If config.toml is missing, copy config_base.toml to config.toml
 if not os.path.exists(CONFIG_PATH):
@@ -53,7 +55,6 @@ if not os.path.exists(CONFIG_PATH):
 
 from endpoints.server import ServerMain
 from endpoints.daemon import DaemonMain
-from error.output import output, CodeType
 
 
 import sys
@@ -63,7 +64,7 @@ from utils.updater import UpdaterCycle
 from utils.quick_setup import QuickSetup
 from utils.log import log, instantiate_log_session
 from utils.systemctl_restarter import Restarter
-import subprocess
+
 import tracemalloc
 tracemalloc.start()
 
