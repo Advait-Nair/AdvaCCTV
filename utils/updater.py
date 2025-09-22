@@ -35,6 +35,8 @@ def check_update():
     if needs_update:
         log("\n\nPreparing update...\n")
         update()
+        log("Update complete! The server will auto-restart.")
+        print('\n'*10)
 
 
 
