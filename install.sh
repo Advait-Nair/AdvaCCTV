@@ -29,6 +29,7 @@ else
     echo "Skipping virtual environment creation."
     echo "Installing dependencies globally. This will use --break-system-packages. You might need to use 'sudo' for the next command"
     sudo pip3.12 install -r requirements.txt --break-system-packages
+fi
 
 echo "
 
