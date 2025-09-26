@@ -14,8 +14,13 @@ def create_path_if_not_exists(path:str):
 def runcmd(s:str, *args, **kwargs):
     return subprocess.run(s.split(' '), *args, **kwargs)
 
+
+
 def restart_self():
-    runcmd("python3.12 .")
+    # Kill the current process and start a new one
+    python_executable = sys.executable
+    script_path = os.path.abspath(".")
+    os.execl(python_executable, python_executable, script_path)
 
 
 def handle_kbd_int(fn, suppress=False):

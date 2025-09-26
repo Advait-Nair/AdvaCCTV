@@ -37,7 +37,6 @@ def update():
     #     fw.close()
 
     restart_self()
-    exit(0)
 
     # runcmd("git pull \n && python3.12 .")
 
