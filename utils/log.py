@@ -40,7 +40,7 @@ def log(*args, **kwargs):
     timestamp = ts()
     print(timestamp, *args, **kwargs)
     recorded_size = 0
-    with open(LOG_PATH, "r+") as f:
+    with open(LOG_PATH, "a+") as f:
         print(timestamp, *args, **kwargs, file=f)
         recorded_size = len(f.readlines())
 
@@ -48,4 +48,7 @@ def log(*args, **kwargs):
             removeTopLines(LOG_PATH, delete_top_n_lines_on_log_full)
 
         f.close()
+
+def error(*args, **kwargs):
+    log('[[ ERR ! ]]',*args, **kwargs)
     

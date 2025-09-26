@@ -7,3 +7,4 @@ Dockerfile.test
 TEST_ENVIRONMENT.md
 **.log
 videos/*
+config.toml

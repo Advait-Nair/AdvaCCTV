@@ -5,7 +5,7 @@ from asyncio import sleep
 import subprocess
 from utils.log import log
 import os
-
+from utils.generic import restart_self, runcmd
 
 check_rate = properties_cfg.get("update_check_rate")
 from utils.config import CONFIG_PATH
@@ -17,10 +17,10 @@ def update():
     #     toml = f.read()
     #     f.close()
     # Run git stash to save any local changes
-    subprocess.run("git stash".split(' '))
+    runcmd("git stash")
 
     # Run git fetch to get remote changes without merging
-    subprocess.run("git fetch".split(' '))
+    runcmd("git fetch")
 
     # Create a list of files to ignore during pull
     ignore_files = ["primary.log", "config.toml"]
@@ -28,23 +28,23 @@ def update():
         # Check if the file exists
         if os.path.exists(file):
             # Add to git assume-unchanged to ignore changes
-            subprocess.run(f"git update-index --assume-unchanged {file}".split(' '))
-    subprocess.run("git pull".split(' '))
-    subprocess.run(f"pip3.12 install -r requirements.txt{" --break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
+            runcmd(f"git update-index --assume-unchanged {file}")
+    runcmd("git pull")
+    runcmd(f"pip3.12 install -r requirements.txt{" --break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
 
     # with open(CONFIG_PATH, 'w') as fw:
     #     fw.write(toml)
     #     fw.close()
 
-    subprocess.run("python3.12 .".split(' '))
+    restart_self()
     exit(0)
 
-    # subprocess.run("git pull \n && python3.12 .".split(' '))
+    # runcmd("git pull \n && python3.12 .")
 
 def check_update():
     log("Running update check...")
-    subprocess.run("git remote update".split(' '), stdout=subprocess.DEVNULL)
-    needs_update = not "up to date" in subprocess.run("git status | grep \"up to date\"".split(' '),encoding="utf-8", stdout=subprocess.PIPE).stdout
+    runcmd("git remote update", stdout=subprocess.DEVNULL)
+    needs_update = not "up to date" in runcmd("git status | grep \"up to date\"",encoding="utf-8", stdout=subprocess.PIPE).stdout
     
     if needs_update:
         log("\n\nPreparing update...\n")
@@ -53,10 +53,10 @@ def check_update():
             log("Update failed! Error below:")
             log(e)
             print('\n'*10)
-            subprocess.run("git reset --hard HEAD".split(' '))
-            subprocess.run("git clean -f".split(' '))
-            subprocess.run("git pull".split(' '))
-            subprocess.run("python3.12 .".split(' '))
+            runcmd("git reset --hard HEAD")
+            runcmd("git clean -f")
+            runcmd("git pull")
+            restart_self()
             exit(1)
             return
         

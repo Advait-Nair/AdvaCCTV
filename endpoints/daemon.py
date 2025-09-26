@@ -11,9 +11,9 @@ async def DaemonTasks(websocket:ClientConnection):
     log("Beginning Daemon Tasks...")
     await websocket.send("AdvaCCTV Daemon - WS Handshake at" + ts())
     message = await websocket.recv()
-    log('From Server: ', message)
+    log('From Server:', message)
 
-    await ContinuouslyVideoClip(websocket.send_data)
+    # await ContinuouslyVideoClip(websocket.send_data)
 
 async def ContinuouslyVideoClip(websocket_sender):
     import camera.picamera_interface as cami

@@ -6,16 +6,17 @@ This script creates a systemd service to automatically start the AdvaCCTV applic
 import os
 import subprocess
 import sys
+from utils.generic import runcmd
 from pathlib import Path
 
 def run_command(command, check=True, shell=False):
     """Run a shell command and return the result."""
     try:
         if shell:
-            result = subprocess.run(command, shell=True, check=check, 
+            result = runcmd(command, shell=True, check=check, 
                                   capture_output=True, text=True)
         else:
-            result = subprocess.run(command, check=check, 
+            result = runcmd(command, check=check, 
                                   capture_output=True, text=True)
         return result
     except subprocess.CalledProcessError as e:
@@ -122,6 +123,9 @@ def check_service_status():
     run_command(['sudo', 'systemctl', 'status', 'advacctv.service', '--no-pager', '-l'], check=False)
 
 def Restarter():
+    print("\nFAIL   Restarter has been disabled. Please manually implement restarting and resilience with your kernel's systemctl service.")
+
+    return
     """Main setup function."""
     print("=== AdvaCCTV Auto-Start Setup ===\n")
     
