@@ -9,7 +9,7 @@ async def ServerTasks(websocket:ServerConnection):
     log("Beginning Server Tasks...")
     async for message in websocket:
         log('From Daemon:', message)
-        await websocket.send("Adva CCTV Server - WS Handshake at" + ts())
+        await websocket.send("Adva CCTV Server - WS Handshake returned at " + ts())
 
 
 
