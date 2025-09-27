@@ -13,7 +13,6 @@ except ModuleNotFoundError: import pip._vendor.tomli as tomllib
 import os
 
 from utils.cfg_path import CONFIG_PATH
-from utils.log import error
 
 
 try:
@@ -31,4 +30,4 @@ try:
         pyv = properties_cfg.get("pyv") or "3.12"
 
 except:
-    error("Cannot parse config.toml - your config file might be corrupt!\n\t1. Run cat config.toml and check the TOML follows specification.\n\t2. Re-run acctv setup to reset the configuration file.\n\t3. Run acctv update. If this fails, manually git pull the latest version, which may fix your issue.",fatal=True)
+    print("Cannot parse config.toml - your config file might be corrupt!\n\t1. Run cat config.toml and check the TOML follows specification.\n\t2. Re-run acctv setup to reset the configuration file.\n\t3. Run acctv update. If this fails, manually git pull the latest version, which may fix your issue.",fatal=True)
