@@ -38,7 +38,8 @@ def _QuickSetup():
                 fw.close()
         
         with open(f"{str(Path.home())}/.bashrc", "a") as fa:
-            fa.write(f'\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && {"source ./.venv/bin/activate &&" if os.path.exists('./.venv') else ''} python{pyv} . $@"\n')
+            venvstr = "source ./.venv/bin/activate && " if os.path.exists('./.venv') else ''
+            fa.write(f'\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && {venvstr} python{pyv} . $@"\n')
             fa.close()
         f.close()
 

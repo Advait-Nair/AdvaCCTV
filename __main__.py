@@ -105,6 +105,8 @@ def is_server():
     # debug override
     if "-svm" in sys.argv:
       return True
+    if "-dm" in sys.argv:
+      return False
     
     return server_mode
 

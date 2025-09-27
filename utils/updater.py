@@ -30,7 +30,9 @@ def update():
             # Add to git assume-unchanged to ignore changes
             runcmd(f"git update-index --assume-unchanged {file}")
     runcmd("git pull")
-    runcmd(f"pip{pyv} install -r requirements.txt{" --break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
+    bsp = " --break-system-packages" if os.path.exists('./.venv') else ''
+    log(f"Installing dependencies using pip{pyv}{bsp}...")
+    runcmd(f"pip{pyv} install -r requirements.txt{bsp}".split(''))
 
     # with open(CONFIG_PATH, 'w') as fw:
     #     fw.write(toml)
