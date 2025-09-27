@@ -50,5 +50,7 @@ def log(*args, **kwargs):
         f.close()
 
 def error(*args, **kwargs):
-    log('[[ ERR ! ]]',*args, **kwargs)
+    is_fatal = kwargs.get('fatal', False)
+    fatal = " FATAL!" if is_fatal else ""
+    log(f'[[ ERR ! ]]{fatal}',*args, **kwargs)
     
