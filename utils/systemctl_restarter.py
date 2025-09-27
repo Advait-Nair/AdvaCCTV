@@ -6,6 +6,7 @@ This script creates a systemd service to automatically start the AdvaCCTV applic
 import os
 import subprocess
 import sys
+from utils.config import pyv
 from utils.generic import runcmd
 from pathlib import Path
 
@@ -43,7 +44,7 @@ eval "$(pyenv init - bash)"
 cd {advacctv_path}
 
 # Run the Python application
-python3.12 .
+python{pyv} .
 """
     
     print(f"Creating startup script at {script_path}")

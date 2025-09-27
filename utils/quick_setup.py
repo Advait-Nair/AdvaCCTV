@@ -1,7 +1,9 @@
 from pathlib import Path
 import re
 from utils.systemctl_restarter import Restarter
+from utils.config import pyv
 import os
+from utils.config import pyv
 
 # Quick setup tool
 # Used to setup the config file on first run
@@ -23,15 +25,17 @@ def _QuickSetup():
                 fw.close()
         
         with open(f"{str(Path.home())}/.bashrc", "a") as fa:
-            fa.write(f'\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && {"source ./.venv/bin/activate &&" if os.path.exists('./.venv') else ''} python3.12 . $@"\n')
+            fa.write(f'\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && {"source ./.venv/bin/activate &&" if os.path.exists('./.venv') else ''} python{pyv} . $@"\n')
             fa.close()
         f.close()
 
     input("Bashrc alias has been created. Run shortcut is 'acctv'. Press Enter to continue with parameter modification, or ^C to abort... ")
     
     
-    server_ip= input("Enter the server IP to use : ")
+    server_ip= input("\nEnter the server IP to use : ")
     server_port= input("Enter the server port to use : ")
+    pyv = input("Enter the python version to use (default 3.12) : ") or "3.12"
+
     server_mode= "true" if "t" in input("Is this a server? (true/false) : ") else "false"
 
     with open("config_base.toml", "r") as f:
@@ -45,6 +49,9 @@ def _QuickSetup():
         
         # Replace server_mode without quotes (as boolean)
         contents = re.sub(r'server_mode\s*=\s*[^\n]*', f'server_mode={server_mode.lower()}', contents)
+
+        # Replace pyv with quotes
+        contents = re.sub(r'pyv\s*=\s*"[^"]*"', f'pyv="{pyv}"', contents)
         
         # Write the updated content back
         with open("config.toml", "w") as write_f:
@@ -68,5 +75,5 @@ def QuickSetup():
         exit(1)
     except Exception as e:
         print(f"\n\nSetup failed: {e}")
-        print("Please fix the issue and run 'python3.12 . setup' again. Internal error? Log an issue on GitHub at Advait-Nair/AdvaCCTV.")
+        print(f"Please fix the issue and run 'python{pyv} . setup' again. Internal error? Log an issue on GitHub at Advait-Nair/AdvaCCTV.")
         exit(1)

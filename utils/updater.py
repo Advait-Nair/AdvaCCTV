@@ -1,6 +1,6 @@
 # Update the whole program on a commit.
 
-from utils.config import properties_cfg
+from utils.config import properties_cfg, pyv
 from asyncio import sleep
 import subprocess
 from utils.log import log
@@ -30,7 +30,7 @@ def update():
             # Add to git assume-unchanged to ignore changes
             runcmd(f"git update-index --assume-unchanged {file}")
     runcmd("git pull")
-    runcmd(f"pip3.12 install -r requirements.txt{" --break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
+    runcmd(f"pip{pyv} install -r requirements.txt{" --break-system-packages" if os.path.exists('./.venv') else ''}".split(''))
 
     # with open(CONFIG_PATH, 'w') as fw:
     #     fw.write(toml)
@@ -38,7 +38,38 @@ def update():
 
     restart_self()
 
-    # runcmd("git pull \n && python3.12 .")
+
+
+def merge_config_base():
+    # Merge config_base.toml into config.toml without overwriting existing keys
+    if not os.path.exists("config_base.toml"):
+        return
+    
+    # read base config - the latest is in this
+    with open("config_base.toml", 'r') as f:
+        base_toml = f.readlines()
+        f.close()
+    
+    # read existing config
+    with open(CONFIG_PATH, 'r') as f:
+        toml = f.readlines()
+        f.close()
+    
+    # Create a dictionary of existing keys in a flattened format in config.toml
+    existing_keys = {}
+    for line in toml:
+        if '=' in line:
+            key = line.split('=')[0].strip()
+            existing_keys[key] = True
+    
+    # Append lines from config_base.toml that don't exist in config.toml
+    with open(CONFIG_PATH, 'a') as f:
+        for line in base_toml:
+            if '=' in line:
+                key = line.split('=')[0].strip() # x = y and x=y are both equivalent
+                if key not in existing_keys:
+                    f.write(line)
+        f.close()
 
 def check_update():
     log("Running update check...")
@@ -55,6 +86,7 @@ def check_update():
             runcmd("git reset --hard HEAD")
             runcmd("git clean -f")
             runcmd("git pull")
+            merge_config_base()
             restart_self()
             exit(1)
             return

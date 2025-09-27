@@ -8,8 +8,7 @@ from utils.log import log, ts
 
 
 async def DaemonTasks(websocket:ClientConnection):
-    log("Beginning Daemon Tasks...")
-    await websocket.send("AdvaCCTV Daemon - WS Handshake sent at" + ts())
+    await websocket.send("AdvaCCTV Daemon - WS Handshake sent at " + ts())
     message = await websocket.recv()
     log('From Server:', message)
 
