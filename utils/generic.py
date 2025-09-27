@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-from utils.log import log
 
 
 def create_path_if_not_exists(path:str):
@@ -24,6 +23,7 @@ def restart_self():
 
 
 def handle_kbd_int(fn, suppress=False):
+    from utils.log import log
     try:
         fn()
     except KeyboardInterrupt:

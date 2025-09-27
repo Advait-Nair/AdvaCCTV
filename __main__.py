@@ -43,6 +43,7 @@ import os
 import sys
 
 from utils.cfg_path import CONFIG_PATH
+from utils.generic import runcmd, handle_kbd_int, restart_self
 
 # If config.toml is missing, copy config_base.toml to config.toml
 if not os.path.exists(CONFIG_PATH):
@@ -53,7 +54,6 @@ if not os.path.exists(CONFIG_PATH):
         exit(1)
     
 
-from utils.generic import runcmd, handle_kbd_int, restart_self
 from error.output import output, CodeType
 
 
