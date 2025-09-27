@@ -47,10 +47,7 @@ def merge_config_base():
     if not os.path.exists("config_base.toml"):
         return
     
-    # read base config - the latest is in this
-    with open("config_base.toml", 'r') as f:
-        base_toml = f.readlines()
-        f.close()
+
     
     # read existing config
     with open(CONFIG_PATH, 'r') as f:
@@ -61,17 +58,37 @@ def merge_config_base():
     existing_keys = {}
     for line in toml:
         if '=' in line:
-            key = line.split('=')[0].strip()
-            existing_keys[key] = True
+            key, value = line.split('=')
+            existing_keys[key.strip()] = value.strip()
+
+    # Copy over the new base to the existing file
+    runcmd("cp config_base.toml config.toml")
+
+    # Run through the new one
+        # read base config - the latest is in this
+    modified_buffer = ""
+    with open("config_base.toml", 'r') as f:
+        base_toml = f.readlines()
+        for bln in base_toml:
+            sub_buffer = bln
+            if '=' in bln:
+                k = bln.split('=').strip()
+                if existing_keys[k]:
+                    sub_buffer = f"{k}={existing_keys[k]}"
+        
+            modified_buffer += sub_buffer + '\n'
+
+
+
     
-    # Append lines from config_base.toml that don't exist in config.toml
-    with open(CONFIG_PATH, 'a') as f:
-        for line in base_toml:
-            if '=' in line:
-                key = line.split('=')[0].strip() # x = y and x=y are both equivalent
-                if key not in existing_keys:
-                    f.write(line)
-        f.close()
+    # # Append lines from config_base.toml that don't exist in config.toml
+    # with open(CONFIG_PATH, 'a') as f:
+    #     for line in base_toml:
+    #         if '=' in line:
+    #             key = line.split('=')[0].strip() # x = y and x=y are both equivalent
+    #             if key not in existing_keys:
+    #                 f.write(line)
+    #     f.close()
 
 def check_update():
     log("Running update check...")
