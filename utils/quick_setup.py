@@ -3,7 +3,6 @@ import re
 from utils.systemctl_restarter import Restarter
 from utils.config import pyv
 import os
-from utils.config import pyv
 
 # Quick setup tool
 # Used to setup the config file on first run
@@ -11,6 +10,8 @@ from utils.config import pyv
 def _QuickSetup():
     print('\n'*11)
     print("AdvaCCTV Quick Setup\n")
+
+    pyv = input("Enter the python version to use (default 3.12) : ").strip() or "3.12"
 
     # Append acctv to .bashrc if not already present
     with open(f"{str(Path.home())}/.bashrc", "r") as f:
@@ -34,7 +35,6 @@ def _QuickSetup():
     
     server_ip= input("\nEnter the server IP to use : ")
     server_port= input("Enter the server port to use : ")
-    pyv = input("Enter the python version to use (default 3.12) : ") or "3.12"
 
     server_mode= "true" if "t" in input("Is this a server? (true/false) : ") else "false"
 
