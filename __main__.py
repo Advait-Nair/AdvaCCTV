@@ -91,8 +91,8 @@ _________________________________________________________________
     
     Adva CCTV is provided "as-is" and comes with
     absolutely no warranty or responsibility for any damage
-    to persons, property or entity caused by the improper
-    function or utilisation of this software.
+    to persons, properties or entities caused by the
+    improper function or utilisation of this software.
       
 _________________________________________________________________\n\n
 """)

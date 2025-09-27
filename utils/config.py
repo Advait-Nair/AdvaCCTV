@@ -8,7 +8,8 @@
 
 
 
-import tomllib
+try: import tomllib
+except ModuleNotFoundError: import pip._vendor.tomli as tomllib
 import os
 
 from utils.cfg_path import CONFIG_PATH
