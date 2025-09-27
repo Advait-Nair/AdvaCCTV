@@ -12,6 +12,18 @@ def _QuickSetup():
     print("AdvaCCTV Quick Setup\n")
 
     pyv = input("Enter the python version to use (default 3.12) : ").strip() or "3.12"
+    with open("config_base.toml", "r") as f:
+        contents = f.read()
+        
+        # Replace pyv with quotes
+        contents = re.sub(r'pyv\s*=\s*"[^"]*"', f'pyv="{pyv}"', contents)
+        
+        # Write the updated content back
+        with open("config_base.toml", "w") as write_f:
+            write_f.write(contents)
+            write_f.close()
+
+        f.close()
 
     # Append acctv to .bashrc if not already present
     with open(f"{str(Path.home())}/.bashrc", "r") as f:
@@ -50,8 +62,7 @@ def _QuickSetup():
         # Replace server_mode without quotes (as boolean)
         contents = re.sub(r'server_mode\s*=\s*[^\n]*', f'server_mode={server_mode.lower()}', contents)
 
-        # Replace pyv with quotes
-        contents = re.sub(r'pyv\s*=\s*"[^"]*"', f'pyv="{pyv}"', contents)
+        
         
         # Write the updated content back
         with open("config.toml", "w") as write_f:
