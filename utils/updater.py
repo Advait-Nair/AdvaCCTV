@@ -86,7 +86,7 @@ def update():
 
 
 def check_update():
-    log("Running update check...", newline=False)
+    log("Running update check...", end=" ")
     runcmd("git remote update", stdout=subprocess.DEVNULL)
     needs_update = not "up to date" in runcmd("git status | grep \"up to date\"",encoding="utf-8", stdout=subprocess.PIPE).stdout
     
@@ -111,7 +111,7 @@ def check_update():
         log("Update complete! The server will auto-restart.")
         print('\n'*10)
 
-    log(" No update found.")
+    log("No update found.")
 
 
 async def UpdaterCycle():
