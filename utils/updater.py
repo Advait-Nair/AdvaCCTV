@@ -111,7 +111,7 @@ def check_update():
         log("Update complete! The server will auto-restart.")
         print('\n'*10)
 
-    log("No update found.")
+    log("No update found.", ts=False)
 
 
 async def UpdaterCycle():

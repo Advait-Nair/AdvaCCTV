@@ -37,7 +37,8 @@ def removeTopLines(file_path, num_lines):
 
 def log(*args, **kwargs):
     ensure_log_file_exists()
-    timestamp = ts()
+    exclude_ts = kwargs.get('ts', True) == False
+    timestamp = ts() if not exclude_ts else ""
     print(timestamp, *args, **kwargs)
     recorded_size = 0
     with open(LOG_PATH, "a+") as f:
