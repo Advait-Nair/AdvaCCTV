@@ -6,7 +6,7 @@ import json
 
 
 
-class StateFlags(GetKey, Enum):
+class StateFlags(Enum):
     EMPTY = 0
     RECV_LIVE = 1
     RECV_FILE = 2
@@ -16,7 +16,7 @@ class StateFlags(GetKey, Enum):
     ACK = 6 # Acknowledge
     MSG = 7 # Message
 
-class EndpointMode(GetKey, Enum):
+class EndpointMode(Enum):
     DAEMON = 0
     SERVER = 1
 
@@ -54,10 +54,9 @@ async def ws_get_dict(ws:ClientConnection) -> dict:
     return {}
 
 async def handshake_success(hs_info_dict:dict):
-    mode = EndpointMode(hs_info_dict.get('mode') or 0).name
+    mode = EndpointMode(hs_info_dict.get('mode') or 0)
     ip = hs_info_dict.get('ip') or 'indeterminate_ip'
-    current_mode = EndpointMode(mode).name
-    fstring = f"{current_mode} @ {ip}"
+    fstring = f"{mode.name} @ {ip}"
     log(fstring, 'handshake success')
 
 async def send_daemon_handshake(ws:ClientConnection):
