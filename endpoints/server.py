@@ -22,7 +22,7 @@ async def ServerTasks(websocket:ServerConnection):
     await handle_server_handshake(ws=websocket)
     while True:
 
-        
+
         flag = await get_flag_in(websocket)
 
         if flag == StateFlags.RECV_FILE:
