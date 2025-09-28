@@ -19,7 +19,11 @@ async def ContinuouslyVideoClip(websocket_sender):
     log("Starting continuous video clipping...")
     while True:
         save_path, output = await cami.clip_video()
-        await websocket_sender(cutils.get_video_binary(save_path=save_path, output=output))
+        await websocket_sender(cutils.get_video_binary(save_path=save_path, video_output=output))
+        # TODO once this basic system works,
+        # TODO a continuous livestream will be sent over websockets as "live". If the socket fails,
+        # TODO that video buffer is locally saved to videos folder, and once the socket is restored,
+        # TODO all unsent videos are sent over the socket in sequence and are flagged as "old footage".
 
 
 

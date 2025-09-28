@@ -2,6 +2,7 @@ from picamera2.encoders import H264Encoder, Quality
 from picamera2.outputs import FfmpegOutput
 from picamera2 import Picamera2
 from utils.config import clip_size, properties_cfg
+from utils.log import log, error
 import datetime
 import asyncio
 from utils.generic import create_path_if_not_exists
@@ -22,7 +23,7 @@ create_path_if_not_exists(VIDEO_SAVE_PATH)
 
 def vname(length:int=DEFAULT_CLIP_LENGTH, suffix=".h264"):
     now = datetime.datetime.now()
-    timestamp = now.strftime("%d_%b_%Y_at_%H%M")
+    timestamp = now.strftime("%d_%b_%Y_at_%H%M%S")
     return f"{timestamp}__{length}s" + suffix
 
 async def clip_video(
@@ -33,11 +34,12 @@ async def clip_video(
     try:
         ffmout = FfmpegOutput(VIDEO_SAVE_PATH + '/' + output)
         cam.start_recording(encoder, ffmout, quality=quality)
-        print(f"Recording '{output}'")
+        log(f"Recording '{output}'")
         await asyncio.sleep(length)
         cam.stop_recording()
-        print(f"Saved '{output}' to '{VIDEO_SAVE_PATH}'")
+        log(f"Saved '{output}' to '{VIDEO_SAVE_PATH}'")
     except Exception as e:
-        print(f"Error recording {output}:", e)
+        error(f"Error recording {output}:", e)
 
     return VIDEO_SAVE_PATH, output
+

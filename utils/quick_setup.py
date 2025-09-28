@@ -43,7 +43,7 @@ def _QuickSetup():
             fa.close()
         f.close()
 
-    input(".bashrc alias has been created. Run shortcut is 'acctv'.\nNote that changes will require a terminal reload.\nPress Enter to continue with parameter modification, or ^C to abort: ")
+    input(".bashrc alias has been created. Run shortcut is 'acctv'.\nNote that changes will require a terminal reload.\n\nPress Enter to continue with parameter modification, or ^C to abort: ")
     
     
     server_ip= input("\nEnter the server IP to use : ")
