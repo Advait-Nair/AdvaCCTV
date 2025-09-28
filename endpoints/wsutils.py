@@ -16,6 +16,7 @@ class StateFlags(Enum):
     WS_HANDSHAKE = 5  # WS Handshake
     ACK = 6 # Acknowledge
     MSG = 7 # Message
+    INITIAL = 8
 
 class EndpointMode(Enum):
     DAEMON = 0
