@@ -98,7 +98,7 @@ async def send_filestream_from_fs(ws:ClientConnection, file_location:str, chunk_
                 await ws.send(segment)
     except Exception as e: error(f'Cannot send filestream from local FS!\n\n{e}\n')
 
-async def recv_filestream(ws:ClientConnection, writes_to = None) -> bytearray | bool:
+async def recv_filestream(ws:ClientConnection, writes_to = None):
     try:
         if writes_to:
             with open(writes_to, 'wb') as writeloc:
