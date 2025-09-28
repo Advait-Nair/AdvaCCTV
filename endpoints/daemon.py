@@ -7,12 +7,11 @@ from utils.log import log, ts
 from endpoints.wsutils import *
 
 
+sent_handshake = False
 async def DaemonTasks(websocket:ClientConnection):
-    await send_daemon_handshake(ws=websocket)
-
-    # await websocket.send("AdvaCCTV Daemon - WS Handshake sent at " + ts())
-    # message = await websocket.recv()
-    # log('From Server:', message)
+    global sent_handshake
+    if not sent_handshake:
+        await send_daemon_handshake(ws=websocket)
 
     await ContinuouslyVideoClip(websocket)
 
