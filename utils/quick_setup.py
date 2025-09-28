@@ -37,10 +37,16 @@ def _QuickSetup():
                 fw.write(bashrc)
                 fw.close()
         
-        with open(f"{str(Path.home())}/.bashrc", "a") as fa:
+        def w(fa):
             venvstr = "source ./.venv/bin/activate && " if os.path.exists('./.venv') else ''
             fa.write(f'\n# AdvaCCTV Alias\nalias acctv="cd ~/AdvaCCTV && {venvstr} python{pyv} . $@"\n')
             fa.close()
+            
+        bpath = f"{str(Path.home())}/."
+        with open(bpath + 'bashrc', "a") as fa: w(fa)
+        if os.path.exists(bpath + 'zshrc'):
+            with open(bpath + 'zshrc', "a") as fa: w(fa)
+
         f.close()
 
     input(".bashrc alias has been created. Run shortcut is 'acctv'.\nNote that changes will require a terminal reload.\n\nPress Enter to continue with parameter modification, or ^C to abort: ")

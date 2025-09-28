@@ -13,7 +13,7 @@
 
     capture_clip_length = 60
     video_save_path = "./videos"
-    pyv = "3.12"
+    pyv="3.12"
 
 [flags]
     server_mode=false
