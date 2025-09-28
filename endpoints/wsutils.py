@@ -23,7 +23,7 @@ class EndpointMode(GetKey, Enum):
 
 async def send_flag_out(ws:ClientConnection, flag:int) -> bool:
     """Send a flag over - this is known as flagging out."""
-    flag = StateFlags.key(flag)
+    flag = StateFlags(flag).name
     try:
         await ws.send(flag.to_bytes())
         log(f'FLAG_OUT {flag}')
@@ -37,7 +37,7 @@ async def get_flag_in(ws:ClientConnection) -> StateFlags:
     try:
         data = await ws.recv()
         flag_enum = int.from_bytes(data)
-        log(f'FLAG_OUT {StateFlags.key(flag_enum)}')
+        log(f'FLAG_OUT {StateFlags(flag_enum).name}')
         return StateFlags(flag_enum)
     except Exception as e: error(f'Cannot flag in!\n\n{e}\n')
     return StateFlags.EMPTY
@@ -54,9 +54,9 @@ async def ws_get_dict(ws:ClientConnection) -> dict:
     return {}
 
 async def handshake_success(hs_info_dict:dict):
-    mode = EndpointMode.key(hs_info_dict.get('mode') or 0)
+    mode = EndpointMode(hs_info_dict.get('mode') or 0).name
     ip = hs_info_dict.get('ip') or 'indeterminate_ip'
-    current_mode = EndpointMode.key(mode)
+    current_mode = EndpointMode(mode).name
     fstring = f"{current_mode} @ {ip}"
     log(fstring, 'handshake success')
 
