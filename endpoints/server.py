@@ -21,13 +21,13 @@ VIDEO_SAVE_PATH = properties_cfg.get('video_save_path') or './videos'
 async def ServerTasks(websocket:ServerConnection):
     handle_server_handshake(ws=websocket)
 
-    while True:
-        flag = await get_flag_in(websocket)
+    
+    flag = await get_flag_in(websocket)
 
-        if flag == StateFlags.RECV_FILE:
-            file_metadata = await ws_get_dict(websocket)
-            log(file_metadata)
-            await recv_filestream(websocket,writes_to=file_metadata.get('filename'))
+    if flag == StateFlags.RECV_FILE:
+        file_metadata = await ws_get_dict(websocket)
+        log(file_metadata)
+        await recv_filestream(websocket,writes_to=file_metadata.get('filename'))
         # async for message in websocket:
 
             # if isinstance(message, str):
