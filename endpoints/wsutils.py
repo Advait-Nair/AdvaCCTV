@@ -23,12 +23,12 @@ class EndpointMode(GetKey, Enum):
 
 async def send_flag_out(ws:ClientConnection, flag:int) -> bool:
     """Send a flag over - this is known as flagging out."""
-    cflag = StateFlags(flag).name
+    cflag = StateFlags(flag)
     try:
-        await ws.send(flag.to_bytes())
-        log(f'FLAG_OUT {cflag}')
+        await ws.send(cflag.value.to_bytes())
+        log(f'FLAG_OUT {cflag.name}')
         return True
-    except Exception as e: error(f'Cannot flag out {cflag}!\n\n{e}\n')
+    except Exception as e: error(f'Cannot flag out {cflag.name}!\n\n{e}\n')
     return False
     
 
