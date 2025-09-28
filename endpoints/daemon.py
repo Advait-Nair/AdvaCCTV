@@ -4,26 +4,39 @@ from websockets import *
 from utils.config import target_ip, port
 import camera.camera_utils as cutils
 from utils.log import log, ts
-
+from endpoints.wsutils import *
 
 
 async def DaemonTasks(websocket:ClientConnection):
-    await websocket.send("AdvaCCTV Daemon - WS Handshake sent at " + ts())
-    message = await websocket.recv()
-    log('From Server:', message)
+    send_daemon_handshake(ws=websocket)
 
-    await ContinuouslyVideoClip(lambda b: websocket.send(b))
+    # await websocket.send("AdvaCCTV Daemon - WS Handshake sent at " + ts())
+    # message = await websocket.recv()
+    # log('From Server:', message)
 
-async def ContinuouslyVideoClip(websocket_sender):
+    await ContinuouslyVideoClip(websocket)
+
+async def ContinuouslyVideoClip(ws:ClientConnection):
+    # Avoid import errors
     import camera.picamera_interface as cami
+
     log("Starting continuous video clipping...")
     while True:
         save_path, output = await cami.clip_video()
-        await websocket_sender(cutils.get_video_binary(save_path=save_path, video_output=output))
-        # TODO once this basic system works,
-        # TODO a continuous livestream will be sent over websockets as "live". If the socket fails,
-        # TODO that video buffer is locally saved to videos folder, and once the socket is restored,
-        # TODO all unsent videos are sent over the socket in sequence and are flagged as "old footage".
+
+        await send_flag_out(ws, StateFlags.RECV_FILE)
+        await ws_send_dict(ws, {
+            'filename': output
+        })
+        await send_filestream_from_fs(ws, save_path)
+
+
+        # await websocket_sender(f"FILENAME: {output}\n".encode('utf-8'))
+        # packets = cutils.get_video_binary(save_path=save_path, video_output=output)
+        # for packet in packets:
+        #     await websocket_sender(packet)
+        # # await websocket_sender(cutils.get_video_binary(save_path=save_path, video_output=output))
+
 
 
 

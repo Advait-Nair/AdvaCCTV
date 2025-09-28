@@ -9,36 +9,6 @@ from utils.generic import restart_self, runcmd
 
 check_rate = properties_cfg.get("update_check_rate")
 from utils.config import CONFIG_PATH
-def update():
-    # Save toml file
-
-    # toml = ""
-    # with open(CONFIG_PATH, 'r') as f:
-    #     toml = f.read()
-    #     f.close()
-    # Run git stash to save any local changes
-    runcmd("git stash")
-
-    # Run git fetch to get remote changes without merging
-    runcmd("git fetch")
-
-    # Create a list of files to ignore during pull
-    ignore_files = ["primary.log", "config.toml"]
-    for file in ignore_files:
-        # Check if the file exists
-        if os.path.exists(file):
-            # Add to git assume-unchanged to ignore changes
-            runcmd(f"git update-index --assume-unchanged {file}")
-    runcmd("git pull")
-    bsp = " --break-system-packages" if os.path.exists('./.venv') else ''
-    log(f"Installing dependencies using pip{pyv}{bsp}...")
-    runcmd(f"pip{pyv} install -r requirements.txt{bsp}".split(''))
-
-    # with open(CONFIG_PATH, 'w') as fw:
-    #     fw.write(toml)
-    #     fw.close()
-
-    restart_self()
 
 
 
@@ -80,15 +50,40 @@ def merge_config_base():
 
 
 
-    
-    # # Append lines from config_base.toml that don't exist in config.toml
-    # with open(CONFIG_PATH, 'a') as f:
-    #     for line in base_toml:
-    #         if '=' in line:
-    #             key = line.split('=')[0].strip() # x = y and x=y are both equivalent
-    #             if key not in existing_keys:
-    #                 f.write(line)
+def update():
+    # Save toml file
+
+    # toml = ""
+    # with open(CONFIG_PATH, 'r') as f:
+    #     toml = f.read()
     #     f.close()
+    # Run git stash to save any local changes
+    runcmd("git stash")
+
+    # Run git fetch to get remote changes without merging
+    runcmd("git fetch")
+
+    # Create a list of files to ignore during pull
+    ignore_files = ["primary.log", "config.toml"]
+    for file in ignore_files:
+        # Check if the file exists
+        if os.path.exists(file):
+            # Add to git assume-unchanged to ignore changes
+            runcmd(f"git update-index --assume-unchanged {file}")
+    runcmd("git pull")
+    bsp = " --break-system-packages" if os.path.exists('./.venv') else ''
+    log(f"Installing dependencies using pip{pyv}{bsp}...")
+    runcmd(f"pip{pyv} install -r requirements.txt{bsp}".split(''))
+
+    # with open(CONFIG_PATH, 'w') as fw:
+    #     fw.write(toml)
+    #     fw.close()
+
+    merge_config_base()
+    restart_self()
+
+
+
 
 def check_update():
     log("Running update check...")

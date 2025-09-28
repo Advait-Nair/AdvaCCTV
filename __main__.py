@@ -41,6 +41,7 @@
 """
 import os
 import sys
+import time
 
 from utils.cfg_path import CONFIG_PATH
 from utils.generic import runcmd, handle_kbd_int, restart_self
@@ -108,6 +109,7 @@ _________________________________________________________________\n\n
 """)
 print ('Running on',sys.version,'\n')
 
+retry_timeout = 5
 
 def is_server():
     # debug override
@@ -115,6 +117,7 @@ def is_server():
       return True
     if "-dm" in sys.argv:
       return False
+    
     
     return server_mode
 
@@ -135,9 +138,23 @@ Main, locflag = get_loc()
 
 def main():
 
+    argvj=' '.join(sys.argv)
+    if '-t' in argvj:
+        global retry_timeout
+        try: retry_timeout = int(argvj.split('-t')[1].strip().split(' ')[0])
+        except: retry_timeout = 5
+        # acctv arg1 arg2 -t 3 arg4
+        #  3 arg4
+        # [3, arg4]
+
     if "setup" in sys.argv:
         QuickSetup()
         restart_self()
+    
+    if "cmerge" in sys.argv:
+        from utils.updater import merge_config_base
+        merge_config_base()
+        exit(1)
 
     if "update" in sys.argv:
         runcmd('git pull')
@@ -146,7 +163,7 @@ def main():
     if "logflush" in sys.argv:
         f = open('primary.log', 'w')
         f.close()
-        exit()
+        exit(1)
     
 
     if "autostart-set" in sys.argv:
@@ -184,6 +201,8 @@ def _controlled_main():
 
         def on_retry():
             handle_nonstandard_exception(e)
+            print(f'Applying {retry_timeout} second retry timeout.')
+            time.sleep(retry_timeout)
             _controlled_main()
         
         handle_kbd_int(
