@@ -71,15 +71,15 @@ def update():
             # Add to git assume-unchanged to ignore changes
             runcmd(f"git update-index --assume-unchanged {file}")
     runcmd("git pull")
-    bsp = " --break-system-packages" if os.path.exists('./.venv') else ''
-    log(f"Installing dependencies using pip{pyv}{bsp}...")
-    runcmd(f"pip{pyv} install -r requirements.txt{bsp}".split(''))
+    # bsp = " --break-system-packages" if os.path.exists('./.venv') else ''
+    # log(f"Installing dependencies using pip{pyv}{bsp}...")
+    # runcmd(f"pip{pyv} install -r requirements.txt{bsp}".split(''))
 
     # with open(CONFIG_PATH, 'w') as fw:
     #     fw.write(toml)
     #     fw.close()
 
-    merge_config_base()
+    
     restart_self()
 
 
@@ -92,19 +92,22 @@ def check_update():
     
     if needs_update:
         log("\n\nPreparing update...\n")
-        try: update()
+        try:
+            update()
+            # merge_config_base()
         except Exception as e:
             log("Update failed! Error below:")
             log(e)
             print('\n'*10)
-            runcmd("git reset --hard HEAD")
-            runcmd("git clean -f")
-            runcmd("git pull")
-            merge_config_base()
+            # runcmd("git reset --hard HEAD")
+            # runcmd("git clean -f")
+            # runcmd("git pull")
+            # merge_config_base()
             restart_self()
             exit(1)
             return
         
+        merge_config_base()
         log("Update complete! The server will auto-restart.")
         print('\n'*10)
 
