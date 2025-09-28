@@ -1,5 +1,5 @@
 from picamera2.encoders import H264Encoder, Quality
-from picamera2.outputs import PyavOutput
+from picamera2.outputs import FfmpegOutput
 from picamera2 import Picamera2
 from utils.config import clip_size, properties_cfg
 import datetime
@@ -30,8 +30,8 @@ async def clip_video(
     quality=Quality.HIGH,
     output=vname(suffix='.mp4')
 ):
-    pyavout = PyavOutput(VIDEO_SAVE_PATH + '/' + output)
-    cam.start_recording(encoder, pyavout, quality=quality)
+    ffmout = FfmpegOutput(VIDEO_SAVE_PATH + '/' + output)
+    cam.start_recording(encoder, ffmout, quality=quality)
     print(f"Recording '{output}'")
     await asyncio.sleep(length)
     cam.stop_recording()
