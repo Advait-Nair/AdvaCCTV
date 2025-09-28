@@ -72,7 +72,7 @@ def merge_config_base():
         for bln in base_toml:
             sub_buffer = bln
             if '=' in bln:
-                k = bln.split('=').strip()
+                k = bln.split('=')[0].strip()
                 if existing_keys[k]:
                     sub_buffer = f"{k}={existing_keys[k]}"
         

@@ -12,7 +12,7 @@ async def DaemonTasks(websocket:ClientConnection):
     message = await websocket.recv()
     log('From Server:', message)
 
-    await ContinuouslyVideoClip(websocket.send_data)
+    await ContinuouslyVideoClip(lambda b: websocket.send(b))
 
 async def ContinuouslyVideoClip(websocket_sender):
     import camera.picamera_interface as cami
