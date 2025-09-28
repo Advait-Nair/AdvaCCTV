@@ -86,12 +86,12 @@ def update():
 
 
 def check_update():
-    log("Running update check...", end=" ")
+    print("Running update check...", end=" ")
     runcmd("git remote update", stdout=subprocess.DEVNULL)
     needs_update = not "up to date" in runcmd("git status | grep \"up to date\"",encoding="utf-8", stdout=subprocess.PIPE).stdout
     
     if needs_update:
-        log("\n\n\nPreparing update...\n")
+        print("\n\n\nPreparing update...\n")
         try:
             update()
             # merge_config_base()
@@ -111,7 +111,7 @@ def check_update():
         log("Update complete! The server will auto-restart.")
         print('\n'*10)
 
-    log("No update found.", ts=False)
+    print("No update found.", ts=False)
 
 
 async def UpdaterCycle():

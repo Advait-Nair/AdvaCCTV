@@ -6,6 +6,7 @@ import json
 
 
 
+
 class StateFlags(Enum):
     EMPTY = 0
     RECV_LIVE = 1
@@ -93,7 +94,10 @@ async def send_filestream_from_fs(ws:ClientConnection, file_location:str, chunk_
     """Send a continuous set of packets that will form a file."""
     try:
         with open(file_location, 'rb') as fb:
+            s_no = 0
             while segment := fb.read1(chunk_size):
+                s_no += 1
+                log(f'Sending {len(segment)} bytes as Segment {s_no}')
                 await ws.send(segment)
     except Exception as e: error(f'Cannot send filestream from local FS!\n\n{e}\n')
 
@@ -101,7 +105,9 @@ async def recv_filestream(ws:ClientConnection, writes_to = None):
     try:
         if writes_to:
             with open(writes_to, 'wb') as writeloc:
+                s_no = 0
                 async for message in ws:
+                    log(f'Received and writing {len(message)} bytes as Segment {s_no}')
                     writeloc.write(message)
             return True
         

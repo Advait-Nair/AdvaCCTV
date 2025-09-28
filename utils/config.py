@@ -26,7 +26,8 @@ try:
         target_ip = server_cfg.get("server_ip")
         port = server_cfg.get("server_port")
         server_mode = flags_cfg.get("server_mode")
-        clip_size = server_cfg.get("capture_clip_length")
+        
+        clip_size = properties_cfg.get("capture_clip_length")
         pyv = properties_cfg.get("pyv") or "3.12"
 
 except:
