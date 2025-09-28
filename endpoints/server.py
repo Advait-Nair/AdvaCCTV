@@ -19,8 +19,7 @@ VIDEO_SAVE_PATH = properties_cfg.get('video_save_path') or './videos'
 
 
 async def ServerTasks(websocket:ServerConnection):
-    await get_flag_in(websocket)
-    while True:
+    for _ in websocket:
         await handle_server_handshake(ws=websocket)
 
 

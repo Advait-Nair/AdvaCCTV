@@ -11,7 +11,6 @@ sent_handshake = False
 async def DaemonTasks(websocket:ClientConnection):
     global sent_handshake
     if not sent_handshake:
-        await send_flag_out(StateFlags.INITIAL)
         await send_daemon_handshake(ws=websocket)
 
     await ContinuouslyVideoClip(websocket)
