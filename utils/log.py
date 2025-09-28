@@ -39,6 +39,9 @@ def log(*args, **kwargs):
     ensure_log_file_exists()
     exclude_ts = kwargs.get('ts', True) == False
     timestamp = ts() if not exclude_ts else ""
+    # Remove 'ts' from kwargs if present to avoid passing it to print
+    if 'ts' in kwargs:
+        del kwargs['ts']
     print(timestamp, *args, **kwargs)
     recorded_size = 0
     with open(LOG_PATH, "a+") as f:
