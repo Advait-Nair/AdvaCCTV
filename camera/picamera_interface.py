@@ -22,18 +22,22 @@ create_path_if_not_exists(VIDEO_SAVE_PATH)
 
 def vname(length:int=DEFAULT_CLIP_LENGTH, suffix=".h264"):
     now = datetime.datetime.now()
-    timestamp = now.strftime("%d %b %Y at %H%M")
-    return f"{timestamp} {length}s" + suffix
+    timestamp = now.strftime("%d_%b_%Y_at_%H%M")
+    return f"{timestamp}__{length}s" + suffix
 
 async def clip_video(
     length=DEFAULT_CLIP_LENGTH,
     quality=Quality.HIGH,
     output=vname(suffix='.mp4')
 ):
-    ffmout = FfmpegOutput(VIDEO_SAVE_PATH + '/' + output)
-    cam.start_recording(encoder, ffmout, quality=quality)
-    print(f"Recording '{output}'")
-    await asyncio.sleep(length)
-    cam.stop_recording()
-    print(f"Saved '{output}' to '{VIDEO_SAVE_PATH}'")
+    try:
+        ffmout = FfmpegOutput(VIDEO_SAVE_PATH + '/' + output)
+        cam.start_recording(encoder, ffmout, quality=quality)
+        print(f"Recording '{output}'")
+        await asyncio.sleep(length)
+        cam.stop_recording()
+        print(f"Saved '{output}' to '{VIDEO_SAVE_PATH}'")
+    except Exception as e:
+        print(f"Error recording {output}:", e)
+
     return VIDEO_SAVE_PATH, output

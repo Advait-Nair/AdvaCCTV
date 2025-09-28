@@ -52,6 +52,8 @@ if not os.path.exists(CONFIG_PATH):
     else:
         output(title="Critical Error!", msg="Config file is missing, and config_base.toml is also missing! Please redownload the package.", ctype=CodeType.Error, code=0)
         exit(1)
+
+
     
 
 from error.output import output, CodeType
@@ -72,6 +74,12 @@ from utils.generic import restart_self, runcmd
 
 import tracemalloc
 tracemalloc.start()
+
+
+VIDEO_SAVE_PATH = properties_cfg.get("video_save_path") or "./videos"
+# If video directory is missing, create it
+if not os.path.exists(VIDEO_SAVE_PATH):
+    os.makedirs(VIDEO_SAVE_PATH)
 
 
 # Python Version Information - Dependency Debug, Runtime Info
