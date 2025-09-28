@@ -25,7 +25,7 @@ async def send_flag_out(ws:ClientConnection, flag:int) -> bool:
     """Send a flag over - this is known as flagging out."""
     cflag = StateFlags(flag)
     try:
-        await ws.send(cflag.value.to_bytes())
+        await ws.send(cflag.value.to_bytes(8))
         log(f'FLAG_OUT {cflag.name}')
         return True
     except Exception as e: error(f'Cannot flag out {cflag.name}!\n\n{e}\n')
@@ -66,7 +66,7 @@ async def send_daemon_handshake(ws:ClientConnection):
         await send_flag_out(ws, StateFlags.WS_HANDSHAKE)
         await ws_send_dict(ws, {
             'ip': get_ip(),
-            'mode': EndpointMode.DAEMON
+            'mode': EndpointMode.DAEMON.value
         })
         server_hs_info_dict = await ws_get_dict(ws)
         handshake_success(hs_info_dict=server_hs_info_dict)
@@ -86,7 +86,7 @@ async def handle_server_handshake(ws:ClientConnection):
         # Send the server's info back
         await ws_send_dict(ws, {
             'ip': get_ip(),
-            'mode': EndpointMode.SERVER
+            'mode': EndpointMode.SERVER.value
         })
     except Exception as e: error(f'Cannot handle daemon handshake as server!\n\n{e}\n')
 
