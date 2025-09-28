@@ -27,7 +27,7 @@ async def ContinuouslyVideoClip(ws:ClientConnection):
         await ws_send_dict(ws, {
             'filename': output
         })
-        await send_filestream_from_fs(ws, save_path)
+        await send_filestream_from_fs(ws, save_path + '/' + output)
 
 
         # await websocket_sender(f"FILENAME: {output}\n".encode('utf-8'))
