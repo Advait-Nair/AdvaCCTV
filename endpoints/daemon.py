@@ -8,7 +8,7 @@ from endpoints.wsutils import *
 
 
 async def DaemonTasks(websocket:ClientConnection):
-    send_daemon_handshake(ws=websocket)
+    await send_daemon_handshake(ws=websocket)
 
     # await websocket.send("AdvaCCTV Daemon - WS Handshake sent at " + ts())
     # message = await websocket.recv()
