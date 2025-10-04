@@ -4,7 +4,7 @@ from websockets import *
 from utils.config import target_ip, port
 from utils.log import error, log, ts
 from utils.config import properties_cfg
-from endpoints._depr_wsutils import *
+# from endpoints._depr_wsutils import *
 from endpoints.advaws import *
 
 

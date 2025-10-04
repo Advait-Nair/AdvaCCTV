@@ -4,7 +4,7 @@ from websockets import *
 from utils.config import target_ip, port
 import camera.camera_utils as cutils
 from utils.log import log, ts
-from endpoints._depr_wsutils import *
+# from endpoints._depr_wsutils import *
 from endpoints.advaws import *
 
 
