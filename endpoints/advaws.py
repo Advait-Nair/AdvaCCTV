@@ -122,9 +122,9 @@ class WSQueue:
         while True:
             try:
                 msg = await asyncio.wait_for(ws.recv(), timeout=2)
-                print(msg, 'received')
                 # All data received is expected to have a packet tag.
                 din = DataInstrument(msg)
+                print(din.get_tag(), din, 'received')
                 cls.master_queue.append(din)
                 for f in cls._subcallers:
                     f(din)
