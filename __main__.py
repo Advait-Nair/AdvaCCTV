@@ -71,7 +71,7 @@ from utils.updater import UpdaterCycle
 from utils.quick_setup import QuickSetup
 from utils.log import log, instantiate_log_session, error
 from utils.systemctl_restarter import Restarter
-from utils.generic import restart_self, runcmd
+from utils.generic import restart_self, runcmd, get_ip
 
 import tracemalloc
 tracemalloc.start()
@@ -126,7 +126,14 @@ def get_loc():
     
     locflag = 'daemon'
     if is_server():
+       
+       # Override the ip, because how on earth would you bind to an address that's not yours? (In this circumstance)
+       global target_ip
+       target_ip = get_ip()
+
        Main = ServerMain
+
+
        locflag = 'server'
     
     return [Main, locflag]
@@ -194,9 +201,21 @@ def handle_nonstandard_exception(e):
 
 
 
+def ki_fn_closer():
+    try:
+        if is_server():
+            from endpoints.server import closer as sc
+            # print('sc',sc)
+            run(sc())
+            return
+        
+        from endpoints.daemon import closer as dc
+        # print('dc',dc)
+        run(dc())
+    except Exception as e: error(e)
 
 def _controlled_main():
-    try: handle_kbd_int(main)
+    try: handle_kbd_int(main, on_ki_fn=ki_fn_closer)
     except Exception as e:
 
         def on_retry():

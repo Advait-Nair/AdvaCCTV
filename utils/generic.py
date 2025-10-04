@@ -22,11 +22,12 @@ def restart_self():
     os.execl(python_executable, python_executable, script_path)
 
 
-def handle_kbd_int(fn, suppress=False):
+def handle_kbd_int(fn, suppress=False, on_ki_fn=lambda: None):
     from utils.log import log
     try:
         fn()
     except KeyboardInterrupt:
+        on_ki_fn()
         if suppress: return
 
         print('\n'*2)

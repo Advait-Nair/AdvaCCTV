@@ -4,14 +4,18 @@ from websockets import *
 from utils.config import target_ip, port
 import camera.camera_utils as cutils
 from utils.log import log, ts
+from asyncio import gather
 # from endpoints._depr_wsutils import *
 from endpoints.advaws import *
 
+closer = lambda: None
 
 async def DaemonTasks(websocket:ClientConnection):
+    global closer
+    closer = websocket.close
+
+    
     print('dtasks triggered')
-    await WSQueue.hook(ws=websocket)
-    await Sender.hook(ws=websocket)
     print('websockets hooked')
 
     await Sender.handshake(report_as=EndpointMode.DAEMON)
@@ -28,17 +32,17 @@ async def DaemonTasks(websocket:ClientConnection):
     jdict.trigger(lambda din: log(din.todict()))
     print('jdict',jdict)
 
-    Sender.send_msg('HEY SERVER')
+    await Sender.send_msg('HEY SERVER')
     print('msg->',jdict)
-    Sender.send_dict({
+    await Sender.send_dict({
         'testdict1': 1
     })
     print('dict->',jdict)
 
-    Sender.send('ACKnowledgement', ProtoTags.ACK)
-    Sender.send('Custom Message', ProtoTags.MSG)
-    Sender.send('Empty', ProtoTags.EMPTY)
-    Sender.send('META to filterout', ProtoTags.META)
+    await Sender.send('ACKnowledgement', ProtoTags.ACK)
+    await Sender.send('Custom Message', ProtoTags.MSG)
+    await Sender.send('Empty', ProtoTags.EMPTY)
+    await Sender.send('META to filterout', ProtoTags.META)
     print('sender.send ack msg empty meta->',jdict)
 
         
@@ -73,8 +77,25 @@ async def ContinuouslyVideoClip(ws:ClientConnection):
 
 async def DaemonMain():
     log("Starting WS Daemon...")
+
+    async def hooks(websocket):
+        print('Hooked!')
+        Sender.hook(ws=websocket)
+        await WSQueue.hook(ws=websocket)
+        # await gather(WSQueue.hook(ws=websocket), Sender.hook(ws=websocket))
+
+    async def daemon_scheduler(ws):
+        # if WSQueue.abort_not_hooked() or Sender.abort_not_hooked():
+        #     print('Unhooked!', WSQueue.ws, Sender.ws)
+        # else: await DaemonTasks(ws)
+        if not WSQueue.abort_not_hooked() and not Sender.abort_not_hooked():
+            await DaemonTasks(ws)
+    
+    async def dual(ws:ClientConnection): await gather(hooks(ws), daemon_scheduler(ws))
+
     await start_client(
         target_ip=target_ip,
         port=port,
-        action=DaemonTasks
+        action=dual
     )
+

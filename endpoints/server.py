@@ -1,9 +1,10 @@
 from error.output import output, CodeType
 from ws_implementation.handler import start_websocket_server
 from websockets import *
-from utils.config import target_ip, port
 from utils.log import error, log, ts
 from utils.config import properties_cfg
+from asyncio import gather
+from utils.config import port
 # from endpoints._depr_wsutils import *
 from endpoints.advaws import *
 
@@ -18,12 +19,11 @@ VIDEO_SAVE_PATH = properties_cfg.get('video_save_path') or './videos'
 # TODO that video buffer is locally saved to videos folder, and once the socket is restored,
 # TODO all unsent videos are sent over the socket in sequence and are flagged as "old footage".
 
+closer = lambda: None
 
 async def ServerTasks(websocket:ServerConnection):
-    # while True:
-        # await handle_server_handshake(websocket)
-    await WSQueue.hook(ws=websocket)
-    await Sender.hook(ws=websocket)
+    global closer
+    closer = websocket.close
 
     await Sender.handshake(report_as=EndpointMode.SERVER)
 
@@ -31,15 +31,15 @@ async def ServerTasks(websocket:ServerConnection):
     ack_empty.add_filters([ProtoTags.EMPTY, ProtoTags.ACK])
     ack_empty.trigger(lambda din: log('ACK/EMPTY', din.tostr()))
 
-    Sender.send_msg('HEY SERVER')
-    Sender.send_dict({
+    await Sender.send_msg('HEY SERVER')
+    await Sender.send_dict({
         'testdict_server': 1
     })
 
-    Sender.send('S ACKnowledgement', ProtoTags.ACK)
-    Sender.send('S Custom Message', ProtoTags.MSG)
-    Sender.send('S Empty', ProtoTags.EMPTY)
-    Sender.send('S META to filterout', ProtoTags.META)
+    await Sender.send('S ACKnowledgement', ProtoTags.ACK)
+    await Sender.send('S Custom Message', ProtoTags.MSG)
+    await Sender.send('S Empty', ProtoTags.EMPTY)
+    await Sender.send('S META to filterout', ProtoTags.META)
 
         # TODO reimplement
         # flag = await get_flag_in(websocket)
@@ -75,9 +75,29 @@ async def ServerTasks(websocket:ServerConnection):
 
 
 async def ServerMain():
+    target_ip = get_ip()
     log(f"Starting WS Server: {target_ip}:{port}...")
+
+    async def hooks(websocket):
+        print('Hooked!')
+        Sender.hook(ws=websocket)
+        await WSQueue.hook(ws=websocket)
+
+    async def server_scheduler(ws):
+        # if WSQueue.abort_not_hooked() or Sender.abort_not_hooked():
+        #     print('Unhooked!', WSQueue.ws, Sender.ws)
+        # else: await ServerTasks(ws)
+        if not WSQueue.abort_not_hooked() and not Sender.abort_not_hooked():
+            await ServerTasks(ws)
+
+    async def hooks(websocket):
+        Sender.hook(ws=websocket)
+        await WSQueue.hook(ws=websocket)
+    
+    async def dual(ws:ClientConnection): await gather(hooks(ws), server_scheduler(ws))
+
     await start_websocket_server(
         target_ip=target_ip,
         port=port,
-        action=ServerTasks
+        action=dual
     )

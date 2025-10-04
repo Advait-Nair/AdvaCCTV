@@ -52,10 +52,9 @@ def _QuickSetup():
     input(".bashrc alias has been created. Run shortcut is 'acctv'.\nNote that changes will require a terminal reload.\n\nPress Enter to continue with parameter modification, or ^C to abort: ")
     
     
-    server_ip= input("\nEnter the server IP to use : ")
-    server_port= input("Enter the server port to use : ")
-
-    server_mode= "true" if "t" in input("Is this a server? (true/false) : ") else "false"
+    server_ip= input("\nEnter the server IP to use when in daemon mode   : ")
+    server_port= input("Enter the server port to use for both modes      : ")
+    server_mode= "true" if "t" in input("Is this a server by default? (true/false)        : ") else "false"
 
     with open("config_base.toml", "r") as f:
         contents = f.read()

@@ -11,7 +11,7 @@ from utils.log import log, error
 from enum import Enum
 from utils.generic import get_enum_key, GetKey, get_ip
 import json
-
+import asyncio
 
 
 
@@ -57,10 +57,10 @@ def display_handshake_success(hs_info_dict:dict):
 
 
 class DataInstrument:
-    def __init__(self, data:Union[str,bytes], ptag=None):
+    def __init__(self, data:Union[str,bytes], ptag=None, encoding='utf-8'):
         """All data inputted must be given a tag with the ptag property if not already provided."""
         if ptag:
-            self.data = apply_packet_tag(data=data, tag=ptag)
+            self.data = apply_packet_tag(data=data.encode(encoding=encoding), tag=ptag)
             return
         
         self.data = data
@@ -72,7 +72,7 @@ class DataInstrument:
     
     def __str__(self, encoding='utf-8'): return self.data.decode(encoding=encoding) if type(self.data) == bytes else self.data
 
-    def tostr(self, encoding='utf-8') -> str: self.__str__(encoding=encoding)
+    def tostr(self, encoding='utf-8') -> str: return self.__str__(encoding=encoding)
     def tobin (self, encoding='utf-8') -> bytes: return self.data.encode(encoding=encoding) if type(self.data) != bytes else self.data
     def todict (self, encoding='utf-8') -> dict:
         if not self.filter_din_by_tag(din=self, applied_filters=[ProtoTags.JDICT, ProtoTags.ID_HANDSHAKE]): log('DataInstrument().todict called on instrument without JDICT or ID_HANDSHAKE tag! Unexpected behaviour is likely.')
@@ -103,29 +103,47 @@ class WSQueue:
     ```
     """
     master_queue:list[DataInstrument] = []
-    ws_instance:ClientConnection = False
+    ws:ClientConnection = False
     subqueue_filter:list[ProtoTags] = []
 
     _subcallers = []
 
     @classmethod
     def _g(cls):
-        try: return cls.ws_instance
+        try: return cls.ws
         except Exception as e: error(e)
 
     @classmethod
     async def hook(cls, ws:ClientConnection): 
-        cls.ws_instance = ws
+        cls.ws = ws
 
         await cls.auto_log_messages(state=True)
-        async for msg in ws:
-            # All data received is expected to have a packet tag.
-            din = DataInstrument(msg)
-            cls.master_queue.append(din)
-            for f in cls._subcallers:
-                f(din)
+        print('alm END')
+        while True:
+            try:
+                msg = await asyncio.wait_for(ws.recv(), timeout=2)
+                print(msg, 'received')
+                # All data received is expected to have a packet tag.
+                din = DataInstrument(msg)
+                cls.master_queue.append(din)
+                for f in cls._subcallers:
+                    f(din)
+            except: None
+            await asyncio.sleep(1)
+        # async for msg in ws:
+        #     print(msg, 'received')
+        #     # All data received is expected to have a packet tag.
+        #     din = DataInstrument(msg)
+        #     cls.master_queue.append(din)
+        #     for f in cls._subcallers:
+        #         f(din)
+        #     asyncio.sleep(2)
 
     
+
+    @classmethod
+    def abort_not_hooked(cls):
+        return not cls.ws
     
 
     @classmethod
@@ -142,7 +160,7 @@ class WSQueue:
         if not state: WSQueue._subcallers.pop(out)
 
 
-    async def __init__(self, subqueue: list[DataInstrument]=[]):
+    def __init__(self, subqueue: list[DataInstrument]=[]):
         self.subqueue = subqueue
         self._filter_ = lambda din: DataInstrument.filter_din_by_tag(din=din, applied_filters=self.subqueue_filter, empty_allows_all=True)
         # self._filter_ = lambda din: din.get_tag() in self.subqueue_filter if len(self.subqueue_filter) > 0 else lambda _: True
@@ -176,7 +194,7 @@ class WSQueue:
     def trigger(self, fn):
         applied_fn = lambda din: fn(din, self.subqueue)
         WSQueue._subcallers.append(applied_fn)
-        WSQueue.trigger_ids[id(fn)] = id(applied_fn)
+        WSQueue.trigger_id_maps[id(fn)] = id(applied_fn)
         
     
     def kill_trigger(self, fn):
@@ -194,30 +212,36 @@ class WSQueue:
 
 class Sender:
 
-    ws:ClientConnection
+    ws:ClientConnection = None
     handshake_sent = False
 
     @classmethod
     def hook(cls, ws:ClientConnection):
         cls.ws = ws
 
+    
+    @classmethod
+    def abort_not_hooked(cls):
+        return not cls.ws
+
     @classmethod
     async def send_din(cls, din: DataInstrument):
-        await cls.ws.send(din)
+        await cls.ws.send(din.tobin())
     
     @classmethod
     async def send(cls, data:Union[str, bytes], tag: ProtoTags):
-        await cls.ws.send(DataInstrument(data=data, ptag=tag))
+        await cls.ws.send(DataInstrument(data=data, ptag=tag).tobin())
     
 
     @classmethod
-    async def send_dict(cls, d:dict, tag: ProtoTags):
+    async def send_dict(cls, d:dict, tag: ProtoTags = ProtoTags.JDICT):
         packaged_data = DataInstrument(json.dumps(d), ptag=tag)
-        await cls.ws.send(packaged_data)
+        print(packaged_data, packaged_data.__str__())
+        await cls.ws.send(packaged_data.tostr())
     
     @classmethod
     async def send_msg(cls, msg:str):
-        await cls.ws.send(DataInstrument(msg, ptag=ProtoTags.MSG))
+        await cls.ws.send(DataInstrument(msg, ptag=ProtoTags.MSG).tostr())
     
     @classmethod
     async def handshake(cls, report_as=EndpointMode.DAEMON, force_handshake=False):
