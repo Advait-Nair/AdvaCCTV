@@ -47,9 +47,8 @@ def get_packet_tag(data:bytes) -> ProtoTags:
     # if data[ptaglen] != separator: return ProtoTags.EMPTY
     try:
         ptri = data.find(separator)
-        tag = data[:ptri]
-        print(tag, tag.decode('utf-8'))
-        return ProtoTags(int(tag.decode('utf-8')))
+        tag:bytes = data[:ptri]
+        return ProtoTags(int.from_bytes(tag))
     except Exception as e: error(f'Cannot extract prototag!\n\n{e}\n')
 
 def get_packet_data(data:bytes, format=str) -> Union[str, bytes]:
