@@ -117,7 +117,7 @@ class WSQueue:
     async def hook(cls, ws:ClientConnection): 
         cls.ws_instance = ws
 
-        cls.auto_log_messages(state=True)
+        await cls.auto_log_messages(state=True)
         async for msg in ws:
             # All data received is expected to have a packet tag.
             din = DataInstrument(msg)
