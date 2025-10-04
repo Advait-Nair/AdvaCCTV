@@ -4,16 +4,38 @@ from websockets import *
 from utils.config import target_ip, port
 import camera.camera_utils as cutils
 from utils.log import log, ts
-from endpoints.wsutils import *
+from endpoints._depr_wsutils import *
+from endpoints.advaws import *
 
 
-sent_handshake = False
 async def DaemonTasks(websocket:ClientConnection):
-    global sent_handshake
-    if not sent_handshake:
-        await send_daemon_handshake(ws=websocket)
+    await WSQueue.hook(ws=websocket)
+    await Sender.hook(ws=websocket)
 
-    await ContinuouslyVideoClip(websocket)
+    await Sender.handshake(report_as=EndpointMode.DAEMON)
+
+    ack_empty = WSQueue()
+    ack_empty.add_filters([ProtoTags.ACK, ProtoTags.EMPTY])
+    ack_empty.trigger(lambda din: log('ACK/EMPTY', din.tostr()))
+
+    jdict = WSQueue()
+
+    jdict.add_filters([ProtoTags.JDICT])
+    jdict.trigger(lambda din: log(din.todict()))
+
+    Sender.send_msg('HEY SERVER')
+    Sender.send_dict({
+        'testdict1': 1
+    })
+
+    Sender.send('ACKnowledgement', ProtoTags.ACK)
+    Sender.send('Custom Message', ProtoTags.MSG)
+    Sender.send('Empty', ProtoTags.EMPTY)
+    Sender.send('META to filterout', ProtoTags.META)
+
+        
+
+    # await ContinuouslyVideoClip(websocket)
 
 async def ContinuouslyVideoClip(ws:ClientConnection):
     # Avoid import errors
@@ -23,11 +45,13 @@ async def ContinuouslyVideoClip(ws:ClientConnection):
     while True:
         save_path, output = await cami.clip_video()
 
-        await send_flag_out(ws, StateFlags.RECV_FILE)
-        await ws_send_dict(ws, {
-            'filename': output
-        })
-        await send_filestream_from_fs(ws, save_path + '/' + output)
+
+        # TODO reimplement
+        # await send_flag_out(ws, StateFlags.RECV_FILE)
+        # await ws_send_dict(ws, {
+        #     'filename': output
+        # })
+        # await send_filestream_from_fs(ws, save_path + '/' + output)
 
 
         # await websocket_sender(f"FILENAME: {output}\n".encode('utf-8'))

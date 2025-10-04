@@ -4,7 +4,8 @@ from websockets import *
 from utils.config import target_ip, port
 from utils.log import error, log, ts
 from utils.config import properties_cfg
-from endpoints.wsutils import *
+from endpoints._depr_wsutils import *
+from endpoints.advaws import *
 
 
 VIDEO_SAVE_PATH = properties_cfg.get('video_save_path') or './videos'
@@ -19,16 +20,37 @@ VIDEO_SAVE_PATH = properties_cfg.get('video_save_path') or './videos'
 
 
 async def ServerTasks(websocket:ServerConnection):
-    async for _ in websocket:
-        await handle_server_handshake(ws=websocket)
+    # while True:
+        # await handle_server_handshake(websocket)
+    await WSQueue.hook(ws=websocket)
+    await Sender.hook(ws=websocket)
+
+    await Sender.handshake(report_as=EndpointMode.SERVER)
+
+    ack_empty = WSQueue()
+    ack_empty.add_filters([ProtoTags.EMPTY, ProtoTags.ACK])
+    ack_empty.trigger(lambda din: log('ACK/EMPTY', din.tostr()))
+
+    Sender.send_msg('HEY SERVER')
+    Sender.send_dict({
+        'testdict_server': 1
+    })
+
+    Sender.send('S ACKnowledgement', ProtoTags.ACK)
+    Sender.send('S Custom Message', ProtoTags.MSG)
+    Sender.send('S Empty', ProtoTags.EMPTY)
+    Sender.send('S META to filterout', ProtoTags.META)
+
+        # TODO reimplement
+        # flag = await get_flag_in(websocket)
+
+        # if flag == StateFlags.RECV_FILE:
+        #     file_metadata = await ws_get_dict(websocket)
+        #     log(file_metadata)
+        #     await recv_filestream(websocket,writes_to=file_metadata.get('filename'))
 
 
-        flag = await get_flag_in(websocket)
 
-        if flag == StateFlags.RECV_FILE:
-            file_metadata = await ws_get_dict(websocket)
-            log(file_metadata)
-            await recv_filestream(websocket,writes_to=file_metadata.get('filename'))
         # async for message in websocket:
 
             # if isinstance(message, str):
