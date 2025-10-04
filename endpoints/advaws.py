@@ -33,12 +33,13 @@ class EndpointMode(Enum):
 
 
 separator = b'/'
+bn = 4
 
 def apply_packet_tag(data:Union[str,bytes], tag:ProtoTags, encoding='utf-8') -> bytes:
     """Tag data with a simple header to indicate it's a string."""
     try:
-        tagged = tag.value.to_bytes(3, byteorder='big') + separator + (data if type(data) == bytes else data.decode(encoding=encoding))
-        print(tagged, tag, data)
+        tagged = tag.value.to_bytes(bn, byteorder='big') + separator + (data if type(data) == bytes else data.encode(encoding=encoding))
+        print('APT',tagged, tag, data)
         return tagged
     except Exception as e: error(f'Cannot inscribe prototag!\n\n{e}\n')
 
@@ -48,7 +49,7 @@ def get_packet_tag(data:bytes) -> ProtoTags:
     try:
         ptri = data.find(separator)
         tag:bytes = data[:ptri]
-        return ProtoTags(int.from_bytes(tag))
+        return ProtoTags(int.from_bytes(tag, byteorder='big'))
     except Exception as e: error(f'Cannot extract prototag!\n\n{e}\n')
 
 def get_packet_data(data:bytes, format=str) -> Union[str, bytes]:
@@ -87,7 +88,7 @@ class DataInstrument:
     def tostr(self, encoding='utf-8', tag=False) -> str:
         """Returns str excluding tag. To include the tag, add argument tag=True"""
         if tag:
-            return self.data.decode(encoding=encoding) if type(self.data) == bytes else self.data
+            return str(self.get_tag().value.to_bytes(bn, byteorder='big')) + separator.decode() + self.data_only.decode(encoding=encoding) if type(self.data) == bytes else self.data
             
         return self.__str__(encoding=encoding)
     
@@ -102,7 +103,7 @@ class DataInstrument:
             error(e)
             return {}
 
-    def get_tag (self) -> ProtoTags: return get_packet_tag(self.data)
+    def get_tag (self) -> ProtoTags: return get_packet_tag(bytes(self.data))
 
 # class Packet:
 #     def __init__(self, tag:ProtoTags, data:DataInstrument):
@@ -252,14 +253,14 @@ class Sender:
     @classmethod
     async def send(cls, data:Union[str, bytes], tag: ProtoTags):
         din = DataInstrument(data=data, ptag=tag)
-        print(din.tostr(tag=True))
+        print('TAGGED',din.tostr(tag=True))
         await cls.ws.send(din.tobin())
     
 
     @classmethod
     async def send_dict(cls, d:dict, tag: ProtoTags = ProtoTags.JDICT):
         packaged_data = DataInstrument(json.dumps(d), ptag=tag)
-        print(packaged_data, packaged_data.__str__())
+        print('SD',packaged_data)
         await cls.ws.send(packaged_data.tostr(tag=True))
     
     @classmethod
