@@ -48,11 +48,13 @@ def get_packet_tag(data:bytes) -> ProtoTags:
     """Extract the tag from the data."""
     # if data[ptaglen] != separator: return ProtoTags.EMPTY
     try:
-        print('DECODED', data)
         ptri = data.find(separator)
         tag:bytes = data[:ptri]
+        print('prototags', ptri, tag, int.from_bytes(tag, byteorder='big'))
         return ProtoTags(int.from_bytes(tag, byteorder='big'))
-    except Exception as e: error(f'Cannot extract prototag!\n\n{e}\n')
+    except Exception as e:
+        error(f'Cannot extract prototag!\n\n{e}\n')
+        return ProtoTags.EMPTY
 
 def get_packet_data(data:bytes, format=str) -> Union[str, bytes]:
     """Extract the tag from the data."""
@@ -101,13 +103,17 @@ class DataInstrument:
     def tostr(self, encoding='utf-8', tag=False) -> str:
         """Returns str excluding tag. To include the tag, add argument tag=True"""
         if tag:
-            return str(self.get_tag().value.to_bytes(bn, byteorder='big')) + separator.decode() + self.data.decode(encoding=encoding) if type(self.data) == bytes else self.data
+            print(self.tag + '/' + self.__str__(encoding=encoding))
+            # error('tostr(tag=) has been deprecated. All data over the websocket is to be sent exclusively over binary.')
+            # tagged = str(self.get_tag().value.to_bytes(bn, byteorder='big')) + separator.decode() + self.data.decode(encoding=encoding) if type(self.data) == bytes else self.data
+            # print('TAGGED', tagged, self.get_tag().value.to_bytes(bn, byteorder='big'))
+            # return str(self.get_tag().value.to_bytes(bn, byteorder='big')) + separator.decode() + self.data.decode(encoding=encoding) if type(self.data) == bytes else self.data
             
         return self.__str__(encoding=encoding)
     
     def tobin (self, encoding='utf-8') -> bytes:
         """Returns bytes including the tag."""
-        return apply_packet_tag(data=self.data, tag=self.tag)
+        return apply_packet_tag(data=self.data, tag=self.tag, encoding=encoding)
         # return self.tag.encode(encoding=encoding) + self.data.encode(encoding=encoding) if type(self.data) != bytes else self.data
     
     def todict (self, encoding='utf-8') -> dict:
@@ -272,7 +278,7 @@ class Sender:
     async def send(cls, data:Union[str, bytes], tag: ProtoTags):
         din = DataInstrument(data=data, ptag=tag)
         # print('TAGGED',din.tostr(tag=True))
-        print('sending',din.tostr(tag=True))
+        print('sending',din)
         await cls.ws.send(din.tobin())
     
 
@@ -280,11 +286,11 @@ class Sender:
     async def send_dict(cls, d:dict, tag: ProtoTags = ProtoTags.JDICT):
         packaged_data = DataInstrument(json.dumps(d), ptag=tag)
         # print('SD',packaged_data)
-        await cls.ws.send(packaged_data.tostr(tag=True))
+        await cls.ws.send(packaged_data.tobin())
     
     @classmethod
     async def send_msg(cls, msg:str):
-        await cls.ws.send(DataInstrument(msg, ptag=ProtoTags.MSG).tostr(tag=True))
+        await cls.ws.send(DataInstrument(msg, ptag=ProtoTags.MSG).tobin())
     
     @classmethod
     async def handshake(cls, report_as=EndpointMode.DAEMON, force_handshake=False):
