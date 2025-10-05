@@ -36,10 +36,10 @@ async def ServerTasks(websocket:ServerConnection):
         'testdict_server': 1
     })
 
-    await Sender.send('S ACKnowledgement', ProtoTags.ACK)
-    await Sender.send('S Custom Message', ProtoTags.MSG)
-    await Sender.send('S Empty', ProtoTags.EMPTY)
-    await Sender.send('S META to filterout', ProtoTags.META)
+    await Sender.send('SERVER HATH ACK', ProtoTags.ACK)
+    await Sender.send('SERVER MESSAGES YOU', ProtoTags.MSG)
+    await Sender.send('TIS EMPTY THE SERVER', ProtoTags.EMPTY)
+    await Sender.send('SERVER IS META', ProtoTags.META)
 
         # TODO reimplement
         # flag = await get_flag_in(websocket)

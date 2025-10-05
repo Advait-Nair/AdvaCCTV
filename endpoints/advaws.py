@@ -39,14 +39,16 @@ def apply_packet_tag(data:Union[str,bytes], tag:ProtoTags, encoding='utf-8') -> 
     """Tag data with a simple header to indicate it's a string."""
     try:
         tagged = tag.value.to_bytes(bn, byteorder='big') + separator + (data if type(data) == bytes else data.encode(encoding=encoding))
-        print('APT',tagged, tag, data)
+        # print('APT',tagged, tag, data)
         return tagged
     except Exception as e: error(f'Cannot inscribe prototag!\n\n{e}\n')
 
 def get_packet_tag(data:bytes) -> ProtoTags:
+    if type(data) != bytes: error('Non-bytes passed to get_packet_tag')
     """Extract the tag from the data."""
     # if data[ptaglen] != separator: return ProtoTags.EMPTY
     try:
+        print('DECODED', data)
         ptri = data.find(separator)
         tag:bytes = data[:ptri]
         return ProtoTags(int.from_bytes(tag, byteorder='big'))
@@ -70,31 +72,43 @@ def display_handshake_success(hs_info_dict:dict):
 class DataInstrument:
     def __init__(self, data:Union[str,bytes], ptag=None, encoding='utf-8'):
         """All data inputted must be given a tag with the ptag property if not already provided."""
+        encoded_bytes = data.encode(encoding=encoding) if type(data) == str else data
+        print('DEB,',data, encoded_bytes, sep='\n')
+
         if ptag:
-            encoded = data.encode(encoding=encoding)
-            self.data = apply_packet_tag(data=encoded, tag=ptag)
-            self.data_only = get_packet_data(data=encoded, format=bytes)
+            self.data = data
+            # self.data = apply_packet_tag(data=encoded, tag=ptag)
+            self.tag = ptag
+            # self.data_only = data
             return
         
-        self.data = data
+
+        self.data = get_packet_data(data=encoded_bytes, format=bytes)
+        print('ENC, DATA', encoded_bytes, data)
+        self.tag = get_packet_tag(data=encoded_bytes)
+        print('DT',self.data, self.tag)
+        # self.data = data
+        # self.data = lambda: apply_packet_tag(self.data_only, tag=self.get_tag())
 
     
     @classmethod
     def filter_din_by_tag(cls, din, applied_filters:list, empty_allows_all=False) -> bool:
         return din.get_tag() in applied_filters if len(applied_filters) > 0 else lambda _: (True if empty_allows_all else False)
     
-    def __str__(self, encoding='utf-8'): return self.data_only.decode(encoding=encoding) if type(self.data_only) == bytes else self.data_only
+    def __str__(self, encoding='utf-8'):
+        return self.data.decode(encoding=encoding) if type(self.data) == bytes else self.data
 
     def tostr(self, encoding='utf-8', tag=False) -> str:
         """Returns str excluding tag. To include the tag, add argument tag=True"""
         if tag:
-            return str(self.get_tag().value.to_bytes(bn, byteorder='big')) + separator.decode() + self.data_only.decode(encoding=encoding) if type(self.data) == bytes else self.data
+            return str(self.get_tag().value.to_bytes(bn, byteorder='big')) + separator.decode() + self.data.decode(encoding=encoding) if type(self.data) == bytes else self.data
             
         return self.__str__(encoding=encoding)
     
     def tobin (self, encoding='utf-8') -> bytes:
         """Returns bytes including the tag."""
-        return self.data.encode(encoding=encoding) if type(self.data) != bytes else self.data
+        return apply_packet_tag(data=self.data, tag=self.tag)
+        # return self.tag.encode(encoding=encoding) + self.data.encode(encoding=encoding) if type(self.data) != bytes else self.data
     
     def todict (self, encoding='utf-8') -> dict:
         if not self.filter_din_by_tag(din=self, applied_filters=[ProtoTags.JDICT, ProtoTags.ID_HANDSHAKE]): log('DataInstrument().todict called on instrument without JDICT or ID_HANDSHAKE tag! Unexpected behaviour is likely.')
@@ -103,7 +117,9 @@ class DataInstrument:
             error(e)
             return {}
 
-    def get_tag (self) -> ProtoTags: return get_packet_tag(bytes(self.data))
+    def get_tag (self) -> ProtoTags:
+        return self.tag
+        # return get_packet_tag(bytes(self.data))
 
 # class Packet:
 #     def __init__(self, tag:ProtoTags, data:DataInstrument):
@@ -140,17 +156,19 @@ class WSQueue:
         cls.ws = ws
 
         await cls.auto_log_messages(state=True)
-        print('alm END')
         while True:
             try:
                 msg = await asyncio.wait_for(ws.recv(), timeout=2)
                 # All data received is expected to have a packet tag.
                 din = DataInstrument(msg)
+                print('msg-res',din)
                 print(din.get_tag(), din, 'received')
                 cls.master_queue.append(din)
                 for f in cls._subcallers:
                     f(din)
-            except: None
+            except Exception as e:
+                error(e)
+                None
             await asyncio.sleep(1)
         # async for msg in ws:
         #     print(msg, 'received')
@@ -253,14 +271,15 @@ class Sender:
     @classmethod
     async def send(cls, data:Union[str, bytes], tag: ProtoTags):
         din = DataInstrument(data=data, ptag=tag)
-        print('TAGGED',din.tostr(tag=True))
+        # print('TAGGED',din.tostr(tag=True))
+        print('sending',din.tostr(tag=True))
         await cls.ws.send(din.tobin())
     
 
     @classmethod
     async def send_dict(cls, d:dict, tag: ProtoTags = ProtoTags.JDICT):
         packaged_data = DataInstrument(json.dumps(d), ptag=tag)
-        print('SD',packaged_data)
+        # print('SD',packaged_data)
         await cls.ws.send(packaged_data.tostr(tag=True))
     
     @classmethod

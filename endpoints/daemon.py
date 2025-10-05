@@ -19,31 +19,30 @@ async def DaemonTasks(websocket:ClientConnection):
     print('websockets hooked')
 
     await Sender.handshake(report_as=EndpointMode.DAEMON)
-    print('hs sent')
+    # print('hs sent')
 
     ack_empty = WSQueue()
     ack_empty.add_filters([ProtoTags.ACK, ProtoTags.EMPTY])
     ack_empty.trigger(lambda din: log('ACK/EMPTY', din.tostr()))
-    print('ack_empty',ack_empty)
+    # print('ack_empty',ack_empty)
 
     jdict = WSQueue()
 
     jdict.add_filters([ProtoTags.JDICT])
     jdict.trigger(lambda din: log(din.todict()))
-    print('jdict',jdict)
+    # print('jdict',jdict)
 
     await Sender.send_msg('HEY SERVER')
-    print('msg->',jdict)
+    # print('msg->',jdict)
     await Sender.send_dict({
         'testdict1': 1
     })
-    print('dict->',jdict)
+    # print('dict->',jdict)
 
     await Sender.send('ACKnowledgement', ProtoTags.ACK)
     await Sender.send('Custom Message', ProtoTags.MSG)
     await Sender.send('Empty', ProtoTags.EMPTY)
     await Sender.send('META to filterout', ProtoTags.META)
-    print('sender.send ack msg empty meta->',jdict)
 
         
 
