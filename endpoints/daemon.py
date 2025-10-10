@@ -26,9 +26,9 @@ async def ContinuouslyVideoClip(ws:ClientConnection):
 
     log("Starting continuous video clipping...")
     while True:
-        save_path, output = await cami.clip_video()
+        save_folder, output = await cami.clip_video()
 
-        with open(save_path, 'rb') as f:
+        with open(save_folder + '/' + output, 'rb') as f:
             buffer = [
                 DataInstrument(data={
                     'filename': output
