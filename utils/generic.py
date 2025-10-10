@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import socket
+import datetime
 
 def create_path_if_not_exists(path:str):
     if not os.path.exists(path):
@@ -14,6 +15,21 @@ def runcmd(s:str, *args, **kwargs):
     return subprocess.run(s.split(' '), *args, **kwargs)
 
 
+def get_build():
+    try:
+        # Get the git commit hash
+        hashno = runcmd("git rev-parse --short HEAD", capture_output=True, text=True).stdout.strip()
+        # Get the git commit number
+        buildno = runcmd("git rev-list --count main", capture_output=True, text=True).stdout.strip()
+        # Get date of latest commit and format like time.strftime("[%d %b %Y at %H:%M:%S]")
+        # Get date of latest commit
+        date = runcmd("git show -s --format=%ci HEAD", capture_output=True, text=True).stdout.strip()
+        # Convert to datetime and format
+        commit_date = datetime.datetime.fromisoformat(date.replace(' ', 'T', 1))
+        formatted_date = commit_date.strftime("released on %d %b %Y at %H:%M")
+        return f"acctv build {buildno} ({hashno}), {formatted_date}"
+    except Exception:
+        return "unknown"
 
 def restart_self():
     # Kill the current process and start a new one

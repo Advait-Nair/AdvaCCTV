@@ -27,19 +27,14 @@ async def ServerTasks(websocket:ServerConnection):
 
     await Sender.handshake(report_as=EndpointMode.SERVER)
 
-    ack_empty = WSQueue()
-    ack_empty.add_filters([ProtoTags.EMPTY, ProtoTags.ACK])
-    ack_empty.trigger(lambda din: log('ACK/EMPTY', din.tostr()))
+    
+    def handle_recv_file(din:DataInstrument, subqueue:list[DataInstrument]):
+        print(din.data, subqueue)
+        
+    recv_file = WSQueue()
+    recv_file.add_filters([ProtoTags.RECV_FILE])
+    recv_file.trigger(handle_recv_file)
 
-    await Sender.send_msg('HEY SERVER')
-    await Sender.send_dict({
-        'testdict_server': 1
-    })
-
-    await Sender.send('SERVER HATH ACK', ProtoTags.ACK)
-    await Sender.send('SERVER MESSAGES YOU', ProtoTags.MSG)
-    await Sender.send('TIS EMPTY THE SERVER', ProtoTags.EMPTY)
-    await Sender.send('SERVER IS META', ProtoTags.META)
 
         # TODO reimplement
         # flag = await get_flag_in(websocket)

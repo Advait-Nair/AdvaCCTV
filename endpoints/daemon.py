@@ -8,45 +8,17 @@ from asyncio import gather
 # from endpoints._depr_wsutils import *
 from endpoints.advaws import *
 
+CHUNK_SIZE = 9000
+
 closer = lambda: None
 
 async def DaemonTasks(websocket:ClientConnection):
     global closer
     closer = websocket.close
 
-    
-    print('dtasks triggered')
-    print('websockets hooked')
-
     await Sender.handshake(report_as=EndpointMode.DAEMON)
-    # print('hs sent')
+    await ContinuouslyVideoClip(websocket)
 
-    ack_empty = WSQueue()
-    ack_empty.add_filters([ProtoTags.ACK, ProtoTags.EMPTY])
-    ack_empty.trigger(lambda din: log('ACK/EMPTY', din.tostr()))
-    # print('ack_empty',ack_empty)
-
-    jdict = WSQueue()
-
-    jdict.add_filters([ProtoTags.JDICT])
-    jdict.trigger(lambda din: log(din.todict()))
-    # print('jdict',jdict)
-
-    await Sender.send_msg('HEY SERVER')
-    # print('msg->',jdict)
-    await Sender.send_dict({
-        'testdict1': 1
-    })
-    # print('dict->',jdict)
-
-    await Sender.send('ACKnowledgement', ProtoTags.ACK)
-    await Sender.send('Custom Message', ProtoTags.MSG)
-    await Sender.send('Empty', ProtoTags.EMPTY)
-    await Sender.send('META to filterout', ProtoTags.META)
-
-        
-
-    # await ContinuouslyVideoClip(websocket)
 
 async def ContinuouslyVideoClip(ws:ClientConnection):
     # Avoid import errors
@@ -55,6 +27,19 @@ async def ContinuouslyVideoClip(ws:ClientConnection):
     log("Starting continuous video clipping...")
     while True:
         save_path, output = await cami.clip_video()
+
+        with open(save_path, 'rb') as f:
+            buffer = [
+                DataInstrument(data={
+                    'filename': output
+                }, ptag=ProtoTags.META).tobin()
+            ]
+            while frame := f.read1(CHUNK_SIZE):
+                buffer.append(frame)
+            f.close()
+
+        await Sender.send_large_buffer(buffer, tag=ProtoTags.RECV_FILE)
+
 
 
         # TODO reimplement
@@ -78,7 +63,7 @@ async def DaemonMain():
     log("Starting WS Daemon...")
 
     async def hooks(websocket):
-        print('Hooked!')
+        # print('Hooked!')
         Sender.hook(ws=websocket)
         await WSQueue.hook(ws=websocket)
         # await gather(WSQueue.hook(ws=websocket), Sender.hook(ws=websocket))

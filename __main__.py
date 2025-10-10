@@ -69,9 +69,9 @@ from utils.config import *
 from asyncio import run, gather
 from utils.updater import UpdaterCycle
 from utils.quick_setup import QuickSetup
-from utils.log import log, instantiate_log_session, error
+from utils.log import log, instantiate_log_session, error, LOG_PATH
 from utils.systemctl_restarter import Restarter
-from utils.generic import restart_self, runcmd, get_ip
+from utils.generic import restart_self, runcmd, get_ip, get_build
 
 import tracemalloc
 tracemalloc.start()
@@ -86,10 +86,10 @@ if not os.path.exists(VIDEO_SAVE_PATH):
 # Python Version Information - Dependency Debug, Runtime Info
 print ('\n'*3)
 
-print("""
+print(f"""
 _________________________________________________________________
 
-      
+
     Adva Software Closed Circuit Television System | advacctv
     
         A FOSS for local home CCTV solutions.
@@ -104,6 +104,26 @@ _________________________________________________________________
     absolutely no warranty or responsibility for any damage
     to persons, properties or entities caused by the
     improper function or utilisation of this software.
+      
+      
+    [?] QUICK ARGUMENTS TABLE
+    
+    -svm            Run as server
+    -dm             Run as daemon
+    -t <t>          Set retry timeout
+                    <t: seconds>, default 5
+    
+    setup           Run in setup mode
+    cmerge          Merge contents of base and setup config
+    update          Check and/or update to latest version
+    flog            Flush contents of log file "{LOG_PATH}"
+    autostart-set   Configure systemd to run on startup
+                    (!) This is experimental.
+
+                    
+    [V] VERSION INFORMATION
+
+    {get_build()}
       
 _________________________________________________________________\n\n
 """)
@@ -167,7 +187,7 @@ def main():
         runcmd('git pull')
         exit(1)
     
-    if "logflush" in sys.argv:
+    if "flog" in sys.argv:
         f = open('primary.log', 'w')
         f.close()
         exit(1)

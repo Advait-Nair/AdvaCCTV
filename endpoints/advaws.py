@@ -39,7 +39,6 @@ def apply_packet_tag(data:Union[str,bytes], tag:ProtoTags, encoding='utf-8') -> 
     """Tag data with a simple header to indicate it's a string."""
     try:
         tagged = tag.value.to_bytes(bn, byteorder='big') + separator + (data if type(data) == bytes else data.encode(encoding=encoding))
-        # print('APT',tagged, tag, data)
         return tagged
     except Exception as e: error(f'Cannot inscribe prototag!\n\n{e}\n')
 
@@ -50,7 +49,6 @@ def get_packet_tag(data:bytes) -> ProtoTags:
     try:
         ptri = data.find(separator)
         tag:bytes = data[:ptri]
-        print('prototags', ptri, tag, int.from_bytes(tag, byteorder='big'))
         return ProtoTags(int.from_bytes(tag, byteorder='big'))
     except Exception as e:
         error(f'Cannot extract prototag!\n\n{e}\n')
@@ -75,7 +73,6 @@ class DataInstrument:
     def __init__(self, data:Union[str,bytes], ptag=None, encoding='utf-8'):
         """All data inputted must be given a tag with the ptag property if not already provided."""
         encoded_bytes = data.encode(encoding=encoding) if type(data) == str else data
-        print('DEB,',data, encoded_bytes, sep='\n')
 
         if ptag:
             self.data = data
@@ -86,9 +83,7 @@ class DataInstrument:
         
 
         self.data = get_packet_data(data=encoded_bytes, format=bytes)
-        print('ENC, DATA', encoded_bytes, data)
         self.tag = get_packet_tag(data=encoded_bytes)
-        print('DT',self.data, self.tag)
         # self.data = data
         # self.data = lambda: apply_packet_tag(self.data_only, tag=self.get_tag())
 
@@ -103,7 +98,7 @@ class DataInstrument:
     def tostr(self, encoding='utf-8', tag=False) -> str:
         """Returns str excluding tag. To include the tag, add argument tag=True"""
         if tag:
-            print(self.tag + '/' + self.__str__(encoding=encoding))
+            return (self.tag + '/' + self.__str__(encoding=encoding))
             # error('tostr(tag=) has been deprecated. All data over the websocket is to be sent exclusively over binary.')
             # tagged = str(self.get_tag().value.to_bytes(bn, byteorder='big')) + separator.decode() + self.data.decode(encoding=encoding) if type(self.data) == bytes else self.data
             # print('TAGGED', tagged, self.get_tag().value.to_bytes(bn, byteorder='big'))
@@ -137,13 +132,13 @@ class DataInstrument:
 class WSQueue:
     """
     ```python
-    WSQueue.push(Packet) # Push to master queue
+    # DO NOT FORGET TO HOOK WSQueue and Sender in a separate coroutine!
+    ack_empty = WSQueue()
+    ack_empty.add_filters([ProtoTags.ACK, ProtoTags.EMPTY])
+    ack_empty.trigger(lambda din, sq: log('ACK/EMPTY >>', din.tostr()))
+    # print('ack_empty',ack_empty)
 
-    subqueue = WSQueue() # Create subqueue
-    subqueue.filter(tags=[ProtoTags.RECV_FILE])
-    subqueue.on_trigger(write_to_fs)
-    # Where def fn (pt:Packet)
-    subqueue.kill_trigger() # Stop listening
+    jdict = WSQueue()
     ```
     """
     master_queue:list[DataInstrument] = []
@@ -167,17 +162,14 @@ class WSQueue:
                 msg = await asyncio.wait_for(ws.recv(), timeout=2)
                 # All data received is expected to have a packet tag.
                 din = DataInstrument(msg)
-                print('msg-res',din)
                 print(din.get_tag(), din, 'received')
                 cls.master_queue.append(din)
                 for f in cls._subcallers:
                     f(din)
             except Exception as e:
                 error(e)
-                None
             await asyncio.sleep(1)
         # async for msg in ws:
-        #     print(msg, 'received')
         #     # All data received is expected to have a packet tag.
         #     din = DataInstrument(msg)
         #     cls.master_queue.append(din)
@@ -208,6 +200,7 @@ class WSQueue:
 
     def __init__(self, subqueue: list[DataInstrument]=[]):
         self.subqueue = subqueue
+        self.subqueue_filter = []
         self._filter_ = lambda din: DataInstrument.filter_din_by_tag(din=din, applied_filters=self.subqueue_filter, empty_allows_all=True)
         # self._filter_ = lambda din: din.get_tag() in self.subqueue_filter if len(self.subqueue_filter) > 0 else lambda _: True
         WSQueue._subcallers.append(
@@ -238,7 +231,7 @@ class WSQueue:
     trigger_id_maps = {}
 
     def trigger(self, fn):
-        applied_fn = lambda din: fn(din, self.subqueue)
+        applied_fn = lambda din: fn(din, self.subqueue) if DataInstrument.filter_din_by_tag(din=din, applied_filters=self.subqueue_filter) else None
         WSQueue._subcallers.append(applied_fn)
         WSQueue.trigger_id_maps[id(fn)] = id(applied_fn)
         
@@ -277,16 +270,20 @@ class Sender:
     @classmethod
     async def send(cls, data:Union[str, bytes], tag: ProtoTags):
         din = DataInstrument(data=data, ptag=tag)
-        # print('TAGGED',din.tostr(tag=True))
-        print('sending',din)
+        # print('sending',din)
         await cls.ws.send(din.tobin())
     
 
     @classmethod
     async def send_dict(cls, d:dict, tag: ProtoTags = ProtoTags.JDICT):
         packaged_data = DataInstrument(json.dumps(d), ptag=tag)
-        # print('SD',packaged_data)
+        # print('sending jdict')
         await cls.ws.send(packaged_data.tobin())
+
+    
+    @classmethod
+    async def send_large_buffer(cls, large_buffer:list[bytes], tag: ProtoTags = ProtoTags.JDICT):
+        cls.ws.send(DataInstrument(data=frame, ptag=tag).tobin() for frame in large_buffer)
     
     @classmethod
     async def send_msg(cls, msg:str):
