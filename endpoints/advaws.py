@@ -283,7 +283,7 @@ class Sender:
     
     @classmethod
     async def send_large_buffer(cls, large_buffer:list[bytes], tag: ProtoTags = ProtoTags.JDICT):
-        cls.ws.send(DataInstrument(data=frame, ptag=tag).tobin() for frame in large_buffer)
+        await cls.ws.send(DataInstrument(data=frame, ptag=tag).tobin() for frame in large_buffer)
     
     @classmethod
     async def send_msg(cls, msg:str):
