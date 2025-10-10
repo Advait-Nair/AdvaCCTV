@@ -7,6 +7,7 @@ from utils.log import log, ts
 from asyncio import gather
 # from endpoints._depr_wsutils import *
 from endpoints.advaws import *
+import json
 
 CHUNK_SIZE = 9000
 
@@ -30,9 +31,9 @@ async def ContinuouslyVideoClip(ws:ClientConnection):
 
         with open(save_folder + '/' + output, 'rb') as f:
             buffer = [
-                DataInstrument(data={
+                DataInstrument(data=json.dumps({
                     'filename': output
-                }, ptag=ProtoTags.META).tobin()
+                }), ptag=ProtoTags.META).tobin()
             ]
             while frame := f.read1(CHUNK_SIZE):
                 buffer.append(frame)
