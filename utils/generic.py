@@ -24,7 +24,7 @@ def megabytes_to_pow2_bytes(mb:int) -> int:
     ```
 
     """
-    return int(math.exp2(math.ceil(math.log2(mb * 10**6))))
+    return int(2**math.ceil(math.log2(mb * 10**6)))
 
 def runcmd(s:str, *args, **kwargs):
     return subprocess.run(s.split(' '), *args, **kwargs)
