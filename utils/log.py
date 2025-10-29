@@ -52,9 +52,10 @@ def log(*args, **kwargs):
             removeTopLines(LOG_PATH, delete_top_n_lines_on_log_full)
 
 def netlog(*args, din, SEND=False, RECV=True, **kwargs): # RECV for readability
+    nt_str = din.get_tag().name if din else 'netlog_untagged'
     print(
         '[ >> RECV ]' if SEND else '[ << SEND ]',
-        f'<{din.get_tag().name if din else 'netlog_untagged'}>', din.tostr(),
+        f'<{nt_str}>', din.tostr(),
         *args, **kwargs
     )
 
