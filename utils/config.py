@@ -11,7 +11,7 @@
 try: import tomllib
 except ModuleNotFoundError: import pip._vendor.tomli as tomllib
 import os
-
+from utils.mirror_logging import *
 from utils.cfg_path import CONFIG_PATH
 
 

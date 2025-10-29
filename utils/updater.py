@@ -1,5 +1,6 @@
 # Update the whole program on a commit.
 
+from utils.mirror_logging import *
 from utils.config import properties_cfg, pyv
 from asyncio import sleep
 import subprocess

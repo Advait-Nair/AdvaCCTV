@@ -2,6 +2,7 @@ from error.output import output, CodeType
 from ws_implementation.handler import start_client
 from websockets import *
 from utils.config import target_ip, port
+from utils.mirror_logging import *
 import camera.camera_utils as cutils
 from utils.log import log, ts
 from asyncio import gather

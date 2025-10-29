@@ -1,5 +1,6 @@
 """Websockets handler
 """
+from utils.mirror_logging import *
 
 from collections.abc import Callable
 
@@ -8,7 +9,6 @@ import asyncio
 from websockets import ClientConnection, ServerConnection
 from websockets.asyncio.server import serve
 from websockets.asyncio.client import connect
-import math
 from utils.generic import megabytes_to_pow2_bytes
 from utils.log import log, error
 

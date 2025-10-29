@@ -3,6 +3,7 @@ from ws_implementation.handler import start_websocket_server
 from websockets import *
 from utils.log import error, log, ts
 from utils.config import properties_cfg
+from utils.mirror_logging import *
 from asyncio import gather
 from utils.config import port
 # from endpoints._depr_wsutils import *
