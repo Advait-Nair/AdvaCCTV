@@ -20,6 +20,19 @@ def print(*args, **kwargs):
         # f.write(kwargs['sep'].join(str(arg) for arg in args))
 
 
+
+
+last_modified = ''
+def has_file_changed(fpath:str):
+    global last_modified
+    current_modified = open(fpath, 'r').read()
+    if current_modified != last_modified:
+        last_modified = current_modified
+        return True
+    else:
+        return False
+
+
 last_line_size = 0
 def _read_tmp_logfile_as_whole(f:typing.TextIO):
     global last_line_size
@@ -29,23 +42,14 @@ def _read_tmp_logfile_as_whole(f:typing.TextIO):
 
 def _read_tmp_logfile_as_updated(f:typing.TextIO):
     global last_line_size
-    os.system('clear')
-    _read_tmp_logfile_as_whole(f)
+    if has_file_changed(f.name):
+        os.system('clear')
+        _read_tmp_logfile_as_whole(f)
 
-
-last_modified = None
-def has_file_not_changed(fpath:str):
-    global last_modified
-    current_modified = os.path.getmtime(fpath)
-    if current_modified == last_modified:
-        last_modified = current_modified
-        return True
-    else: return False
 
 
 def StartMirrorLogging():
     """Begin a mirroring process. This is a dedicated process."""
-    builtins.print('Beginning Mirror Logging...')
     with open(TMP_MIRROR_LOG_PATH, 'r') as tmp_log_f_r:
         _read_tmp_logfile_as_whole(tmp_log_f_r)
     while True:
