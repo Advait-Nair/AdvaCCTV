@@ -5,11 +5,26 @@ import subprocess
 import sys
 import socket
 import datetime
+import math
 
 def create_path_if_not_exists(path:str):
     if not os.path.exists(path):
         os.makedirs(path)
 
+def megabytes_to_pow2_bytes(mb:int) -> int:
+    """
+    Returns the nearest power of two bytes given any integer mb, in megabytes.
+
+    Worked by ceiling the result of log2 (mb * 10**6), and then using
+    this closest integer power to exp2 and give pow2 bytes.
+
+    ```python
+    megabytes_to_pow2_bytes(50)
+    > 67108864
+    ```
+
+    """
+    return int(math.exp2(math.ceil(math.log2(mb * 10**6))))
 
 def runcmd(s:str, *args, **kwargs):
     return subprocess.run(s.split(' '), *args, **kwargs)

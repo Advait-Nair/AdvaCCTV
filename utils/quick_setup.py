@@ -21,9 +21,6 @@ def _QuickSetup():
         # Write the updated content back
         with open("config_base.toml", "w") as write_f:
             write_f.write(contents)
-            write_f.close()
-
-        f.close()
 
     # Append acctv to .bashrc if not already present
     with open(f"{str(Path.home())}/.bashrc", "r") as f:
@@ -35,7 +32,6 @@ def _QuickSetup():
             # Write the cleaned bashrc back
             with open(f"{str(Path.home())}/.bashrc", "w") as fw:
                 fw.write(bashrc)
-                fw.close()
         
         def w(fa):
             venvstr = "source ./.venv/bin/activate && " if os.path.exists('./.venv') else ''
@@ -47,7 +43,6 @@ def _QuickSetup():
         if os.path.exists(bpath + 'zshrc'):
             with open(bpath + 'zshrc', "a") as fa: w(fa)
 
-        f.close()
 
     input(".bashrc alias has been created. Run shortcut is 'acctv'.\nNote that changes will require a terminal reload.\n\nPress Enter to continue with parameter modification, or ^C to abort: ")
     
@@ -73,9 +68,6 @@ def _QuickSetup():
         # Write the updated content back
         with open("config.toml", "w") as write_f:
             write_f.write(contents)
-            write_f.close()
-
-        f.close()
 
     
     autostart_req = True if 'y' in input ("Do you want to auto-setup systemd service? (Y/N) : ").lower() else False

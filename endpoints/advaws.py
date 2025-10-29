@@ -7,9 +7,9 @@ Queue and collect tagged chunks of data
 
 from websockets import ClientConnection
 from typing import Union # We use Union because Picamera2 + dependencies is compiled to run on Python 3.9... which doesnt have the pipe (3.10+)
-from utils.log import log, error
+from utils.log import log, error, netlog
 from enum import Enum
-from utils.generic import get_enum_key, GetKey, get_ip
+from utils.generic import get_enum_key, GetKey, get_ip, get_build
 import json
 import asyncio
 
@@ -19,13 +19,16 @@ class ProtoTags(Enum):
     EMPTY = 0
     RECV_LIVE = 1
     RECV_FILE = 2
-    OLD_RECORDING = 3
-    META = 4
-    ID_HANDSHAKE = 5  # WS IP and Identity Handshake
-    ACK = 6 # Acknowledge
-    MSG = 7 # Message
-    UNK = 8
-    JDICT = 9 # dictionary
+    RECV_FILE_END = 3
+    RECV_LIVE_END = 4
+    OLD_RECORDING = 5
+    META = 6
+    ID_HANDSHAKE = 7  # WS IP and Identity Handshake
+    ACK = 8 # Acknowledge
+    MSG = 9 # Message
+    UNK = 10
+    JDICT = 11 # dictionary
+    LBUFF = 12 # Large Buffer
 
 class EndpointMode(Enum):
     DAEMON = 0
@@ -64,12 +67,15 @@ def get_packet_data(data:bytes, format=str) -> Union[str, bytes]:
 def display_handshake_success(hs_info_dict:dict):
     mode = EndpointMode(hs_info_dict.get('mode') or 0)
     ip = hs_info_dict.get('ip') or 'indeterminate_ip'
-    fstring = f"{mode.name} @ {ip}"
-    log(fstring, 'handshake success')
+    running_build = hs_info_dict.get('running_build')
+    fstring = f"Established two-way connection with {ip}/{mode.name} running {running_build}"
+    log(fstring)
 
 
 
 class DataInstrument:
+    
+
     def __init__(self, data:Union[str,bytes], ptag=None, encoding='utf-8'):
         """All data inputted must be given a tag with the ptag property if not already provided."""
         encoded_bytes = data.encode(encoding=encoding) if type(data) == str else data
@@ -86,6 +92,8 @@ class DataInstrument:
         self.tag = get_packet_tag(data=encoded_bytes)
         # self.data = data
         # self.data = lambda: apply_packet_tag(self.data_only, tag=self.get_tag())
+
+
 
     
     @classmethod
@@ -144,6 +152,8 @@ class WSQueue:
     master_queue:list[DataInstrument] = []
     ws:ClientConnection = False
     subqueue_filter:list[ProtoTags] = []
+    ephemeral = False
+    flush_next = False
 
     _subcallers = []
 
@@ -151,6 +161,26 @@ class WSQueue:
     def _g(cls):
         try: return cls.ws
         except Exception as e: error(e)
+    
+    @classmethod
+    def ephemeral_mode(cls, set_to=True):
+        cls.ephemeral = set_to
+
+    @classmethod
+    def flush(cls):
+        cls.flush_next = True
+
+    @classmethod
+    def handle_queue_size_control(cls):
+        # Flush; clear all
+        if cls.flush_next:
+            cls.master_queue.clear()
+            cls.flush_next = False
+
+        # The queue is cut off from the 20th message onwards
+        if cls.master_queue.__len__() > 20: return
+        cls.master_queue = cls.master_queue[:19]
+        
 
     @classmethod
     async def hook(cls, ws:ClientConnection): 
@@ -159,16 +189,21 @@ class WSQueue:
         await cls.auto_log_messages(state=True)
         while True:
             try:
-                msg = await asyncio.wait_for(ws.recv(), timeout=2)
+                msg = await asyncio.wait_for(ws.recv(), timeout=0.2)
                 # All data received is expected to have a packet tag.
                 din = DataInstrument(msg)
-                print(din.get_tag(), din, 'received')
-                cls.master_queue.append(din)
+
+                netlog(din=din, RECV=True)
+
+                if not cls.ephemeral: cls.master_queue.append(din)
                 for f in cls._subcallers:
                     f(din)
+                cls.handle_queue_size_control()
+                
+
             except Exception as e:
                 error(e)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
         # async for msg in ws:
         #     # All data received is expected to have a packet tag.
         #     din = DataInstrument(msg)
@@ -282,8 +317,12 @@ class Sender:
 
     
     @classmethod
-    async def send_large_buffer(cls, large_buffer:list[bytes], tag: ProtoTags = ProtoTags.JDICT):
-        await cls.ws.send(DataInstrument(data=frame, ptag=tag).tobin() for frame in large_buffer)
+    async def send_large_buffer(cls, large_buffer:list[bytes], tag: ProtoTags = ProtoTags.LBUFF):
+        # await cls.ws.send(DataInstrument(data=frame, ptag=tag).tobin() for frame in large_buffer)
+        for frame in large_buffer:
+            await cls.ws.send(
+                DataInstrument(data=frame, ptag=tag).tobin()
+            )
     
     @classmethod
     async def send_msg(cls, msg:str):
@@ -294,7 +333,8 @@ class Sender:
         if not force_handshake and cls.handshake_sent: return
         client_identity = {
             'ip': get_ip(),
-            'mode': report_as.value
+            'mode': report_as.value,
+            'running_version': get_build()
         }
         await cls.send_dict(client_identity, tag=ProtoTags.ID_HANDSHAKE)
         cls.handshake_sent = True

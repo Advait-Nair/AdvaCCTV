@@ -22,7 +22,6 @@ def merge_config_base():
     # read existing config
     with open(CONFIG_PATH, 'r') as f:
         toml = f.readlines()
-        f.close()
     
     # Create a dictionary of existing keys in a flattened format in config.toml
     existing_keys = {}
@@ -56,7 +55,6 @@ def update():
     # toml = ""
     # with open(CONFIG_PATH, 'r') as f:
     #     toml = f.read()
-    #     f.close()
     # Run git stash to save any local changes
     runcmd("git stash")
 
@@ -77,7 +75,6 @@ def update():
 
     # with open(CONFIG_PATH, 'w') as fw:
     #     fw.write(toml)
-    #     fw.close()
 
     
     restart_self()

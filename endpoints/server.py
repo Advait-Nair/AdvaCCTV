@@ -30,6 +30,8 @@ async def ServerTasks(websocket:ServerConnection):
     
     def handle_recv_file(din:DataInstrument, subqueue:list[DataInstrument]):
         print(din.data, subqueue)
+        # Write this data to-file, and discard it immediately
+        
         
     recv_file = WSQueue()
     recv_file.add_filters([ProtoTags.RECV_FILE])
