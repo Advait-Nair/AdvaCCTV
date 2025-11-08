@@ -90,7 +90,6 @@ if not os.path.exists(VIDEO_SAVE_PATH):
 print ('\n'*3)
 
 
-newline = '\n'
 print(f"""
 _________________________________________________________________
 
@@ -145,9 +144,12 @@ _________________________________________________________________
 
     [A] RUNNING CONFIGURATION
 
-    {(newline+'    ').join(flags_overview_str.split('\n')) or '\tDefault configuration'}
+    {("""
+    """).join(flags_overview_str.split('\n')) or '\tDefault configuration'}
       
-_________________________________________________________________{newline}{newline}
+_________________________________________________________________
+
+
 """)
 print ('Running on',sys.version,'\n')
 
