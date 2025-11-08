@@ -89,6 +89,8 @@ if not os.path.exists(VIDEO_SAVE_PATH):
 # Python Version Information - Dependency Debug, Runtime Info
 print ('\n'*3)
 
+
+newline = '\n'
 print(f"""
 _________________________________________________________________
 
@@ -143,9 +145,9 @@ _________________________________________________________________
 
     [A] RUNNING CONFIGURATION
 
-    {'\n    '.join(flags_overview_str.split('\n')) or '\tDefault configuration'}
+    {(newline+'    ').join(flags_overview_str.split('\n')) or '\tDefault configuration'}
       
-_________________________________________________________________\n\n
+_________________________________________________________________{newline}{newline}
 """)
 print ('Running on',sys.version,'\n')
 
