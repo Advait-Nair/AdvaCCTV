@@ -73,10 +73,12 @@ from utils.quick_setup import QuickSetup
 from utils.log import log, instantiate_log_session, error, LOG_PATH
 from utils.systemctl_restarter import Restarter
 from utils.generic import restart_self, runcmd, get_ip, get_build
+from utils.arguments import *
 
 import tracemalloc
 tracemalloc.start()
 
+retry_timeout = get_cli_value_arg('-t', int, 5)
 
 VIDEO_SAVE_PATH = properties_cfg.get("video_save_path") or "./videos"
 # If video directory is missing, create it
@@ -109,10 +111,20 @@ _________________________________________________________________
       
     [?] QUICK ARGUMENTS TABLE
     
-    -svm            Run as server
-    -dm             Run as daemon
-    -t <t>          Set retry timeout
-                    <t: seconds>, default 5
+    -svm                Run as server
+    -dm                 Run as daemon
+    
+    -t <t>              Set retry timeout
+                        <t: seconds>, default 5
+    -ip <ipv4>          Connect to server ip
+                        <ipv4: 255.255.255.255>, default
+                        from config.toml
+    -port <port>        Connect to server on port
+                        <port: integer>, default from
+                        config.toml
+    -clip-length <l>    Set video clipping length for
+                        the daemon
+    
     
     setup           Run in setup mode
     mirrorlog       Run a live mirror stdout stream from an
@@ -127,6 +139,11 @@ _________________________________________________________________
     [V] VERSION INFORMATION
 
     {get_build()}
+
+
+    [A] RUNNING CONFIGURATION
+
+    {'\n    '.join(flags_overview_str.split('\n')) or '\tDefault configuration'}
       
 _________________________________________________________________\n\n
 """)
@@ -166,41 +183,31 @@ def get_loc():
 
 Main, locflag = get_loc()
 
+
+
+
 def main():
+    global target_ip
 
-    argvj=' '.join(sys.argv)
-    if '-t' in argvj:
-        global retry_timeout
-        try: retry_timeout = int(argvj.split('-t')[1].strip().split(' ')[0])
-        except: retry_timeout = 5
-        # acctv arg1 arg2 -t 3 arg4
-        #  3 arg4
-        # [3, arg4]
 
-    if "setup" in sys.argv:
+    if is_flag_present_arg('setup'):
         QuickSetup()
         restart_self()
-    
-    if "cmerge" in sys.argv:
+    elif is_flag_present_arg("cmerge"):
         from utils.updater import merge_config_base
         merge_config_base()
         exit(1)
-
-    if "update" in sys.argv:
+    elif is_flag_present_arg("update"):
         runcmd('git pull')
         exit(1)
-    
-    if "flog" in sys.argv:
+    elif is_flag_present_arg("flog"):
         f = open('primary.log', 'w')
         f.close()
         exit(1)
-
-    if "mirrorlog" in sys.argv:
+    if is_flag_present_arg("mirrorlog"):
         handle_kbd_int(fn=StartMirrorLogging(), suppress=True, on_ki_fn=lambda: log('Exiting live log mirror.'))
         exit(1)
-    
-
-    if "autostart-set" in sys.argv:
+    if is_flag_present_arg("autostart-set"):
         Restarter()
         exit(1)
 

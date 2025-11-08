@@ -39,6 +39,7 @@ async def start_client(target_ip:str, port:int, action:Callable[[ClientConnectio
             # await action(websocket)
         async for websocket in connect(f"ws://{target_ip}:{port}", **CONN_KWARGS):
             try:
+                print('client started')
                 await action(websocket)
             except Exception as e:
                 error(e)

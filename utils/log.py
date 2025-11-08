@@ -1,8 +1,9 @@
 import datetime
 from utils.config import properties_cfg
 import os
-
+import traceback
 from utils.mirror_logging import *
+from utils.verbose import VERBOSE
 
 max_log_size:int = properties_cfg.get("max_log_size") or 5000
 delete_top_n_lines_on_log_full = properties_cfg.get("delete_top_n_lines_on_log_full")
@@ -62,7 +63,7 @@ def netlog(*args, din, SEND=False, RECV=True, **kwargs): # RECV for readability
 def error(*args, **kwargs):
     is_fatal = kwargs.get('fatal', False)
     fatal = " FATAL!" if is_fatal else ""
-    log(f'[[ ERR ! ]]{fatal}',*args, **kwargs)
+    log(f'[[ ERR ! ]]{fatal}',*args, f'\nTRACEBACK RESULT: {traceback.format_exc()}\n' if VERBOSE else '\r', **kwargs)
 
 
 

@@ -43,7 +43,8 @@ def get_build():
         commit_date = datetime.datetime.fromisoformat(date.replace(' ', 'T', 1))
         formatted_date = commit_date.strftime("released on %d %b %Y at %H:%M")
         return f"acctv build {buildno} ({hashno}), {formatted_date}"
-    except Exception:
+    except Exception as e:
+        print('Aside: ', e)
         return "unknown"
 
 def restart_self():
