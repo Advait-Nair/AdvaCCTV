@@ -90,6 +90,9 @@ if not os.path.exists(VIDEO_SAVE_PATH):
 print ('\n'*3)
 
 
+a_sep="""
+    """
+newline = '\n'
 print(f"""
 _________________________________________________________________
 
@@ -144,8 +147,7 @@ _________________________________________________________________
 
     [A] RUNNING CONFIGURATION
 
-    {("""
-    """).join(flags_overview_str.split('\n')) or '\tDefault configuration'}
+    {a_sep.join(flags_overview_str.split(newline)) or '    Default configuration'}
       
 _________________________________________________________________
 
